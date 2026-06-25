@@ -49,7 +49,7 @@ const submitFeedback = async () => {
 <template>
   <div class="about-page" style="padding: 4rem 1.5rem; max-width: 900px; margin: 0 auto; color: #0f172a;">
     <div style="text-align: center; margin-bottom: 4rem;">
-      <p style="text-transform: uppercase; letter-spacing: 2px; color: #6366f1; font-weight: 700; margin-bottom: 0.5rem; font-size: 0.9rem;">About The Tech</p>
+      <p style="text-transform: uppercase; letter-spacing: 2px; color: #6366f1; font-weight: 700; margin-bottom: 0.5rem; font-size: 0.9rem;">Introduce</p>
       <h1 style="font-size: 3.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.02em;">Raray Vision API</h1>
       <p style="font-size: 1.25rem; color: #475569; max-width: 600px; margin: 0 auto; line-height: 1.6;">
         Raray Vision takes its name from the Sundanese word <strong>Raray</strong>, meaning face. The project is dedicated to advancing face recognition technology through open, scalable, and intelligent computer vision.
@@ -178,11 +178,28 @@ const submitFeedback = async () => {
           <ul style="list-style: none; padding: 0; margin: 0; color: #475569; display: flex; flex-direction: column; gap: 0.5rem;">
             <li style="display: flex; align-items: center; gap: 0.5rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Linux Server / Docker Ready</li>
             <li style="display: flex; align-items: center; gap: 0.5rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Nginx Reverse Proxy & HTTPS</li>
-            <li style="display: flex; align-items: center; gap: 0.5rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> CPU & NVIDIA CUDA Acceleration</li>
+            <li style="display: flex; align-items: center; gap: 0.5rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Lightweight CPU Inference (Optional NVIDIA CUDA)</li>
             <li style="display: flex; align-items: center; gap: 0.5rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Edge Deployment Ready</li>
             <li style="display: flex; align-items: center; gap: 0.5rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Horizontal Scalability</li>
           </ul>
         </div>
+      </div>
+
+      <!-- How Face Embedding Works -->
+      <div style="margin-top: 2rem; background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1.25rem; color: #0f172a; display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          How Face Embedding Works
+        </h3>
+        <p style="color: #475569; margin: 0 0 0.75rem 0; line-height: 1.6; font-size: 0.95rem;">
+          Raray Vision uses the <strong style="color: #0f172a;">ArcFace</strong> algorithm with a <strong style="color: #0f172a;">ResNet50</strong> backbone. ArcFace applies an <em>Additive Angular Margin Loss</em> during training, which forces the model to learn highly discriminative features by maximizing the angular distance between different identities in the embedding space.
+        </p>
+        <p style="color: #475569; margin: 0 0 0.75rem 0; line-height: 1.6; font-size: 0.95rem;">
+          Each detected face is aligned using 5-point facial landmarks, then passed through the ResNet50 network to produce a compact <strong style="color: #0f172a;">512-dimensional float32 vector</strong> (embedding). This vector is a unique numerical "fingerprint" of the face.
+        </p>
+        <p style="color: #475569; margin: 0; line-height: 1.6; font-size: 0.95rem;">
+          Matching is performed using <strong style="color: #0f172a;">Cosine Similarity</strong> — measuring the angle between two embedding vectors. A similarity score above <strong style="color: #0f172a;">0.45</strong> (1:1 verification) or <strong style="color: #0f172a;">0.50</strong> (1:N identification) indicates a positive match.
+        </p>
       </div>
     </div>
 
@@ -216,6 +233,17 @@ const submitFeedback = async () => {
         <div v-if="status" style="margin-top: 1.5rem; padding: 1rem; border-radius: 8px; font-weight: 600; text-align: center;" :style="status.includes('Error') ? 'background:#fef2f2;color:#ef4444;' : 'background:#f0fdf4;color:#16a34a;'">
           {{ status }}
         </div>
+      </div>
+    </div>
+
+    <!-- Creator Quote Section -->
+    <div style="max-width: 800px; margin: 0 auto 4rem auto; background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; display: flex; flex-wrap: wrap; align-items: center; gap: 2rem; justify-content: center;">
+      <img src="/creator.jpg" alt="Creator of Raray Vision" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" />
+      <div style="flex: 1; min-width: 250px;">
+        <p style="font-size: 1.15rem; color: #334155; font-style: italic; line-height: 1.6; margin: 0 0 1rem 0; position: relative;">
+          "For me, engineering is more than writing code—it's about creating technology that people can trust, maintain, and truly own. Every project I build is driven by simplicity, reliability, and a commitment to open innovation."
+        </p>
+        <p style="font-size: 1rem; font-weight: 700; color: #0f172a; margin: 0;">— Dedin, Founder & Lead Engineer</p>
       </div>
     </div>
 
