@@ -92,8 +92,25 @@ def save_face_to_db(db_session, user_id, face_id, name, embedding, image_url=Non
 def delete_face_from_db(db_session, user_id, face_id):
     face = db_session.query(db_models.Face).filter(db_models.Face.user_id == user_id, db_models.Face.face_id == face_id).first()
     if face:
+        image_url = face.image_url
         db_session.delete(face)
         db_session.commit()
+        
+        # Hapus file fisik foto jika ada
+        if image_url:
+            import os
+            filename = os.path.basename(image_url)
+            # File mungkin disimpan di dua lokasi berbeda berdasarkan controller
+            path1 = os.path.join(os.path.dirname(os.path.dirname(__file__)), "controllers", "uploads", "faces", filename)
+            path2 = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "faces", filename)
+            
+            for p in [path1, path2]:
+                if os.path.exists(p):
+                    try:
+                        os.remove(p)
+                    except Exception as e:
+                        print(f"Error deleting file {p}: {e}")
+                        
         return True
     return False
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException, Form, Depends
+from fastapi import APIRouter, File, UploadFile, HTTPException, Form, Depends, Request
 from sqlalchemy.orm import Session
 import json
 import base64
@@ -116,6 +116,7 @@ async def extract_face_endpoint(file: UploadFile = File(...)):
     summary="Register a new face with liveness verification"
 )
 async def register_face_endpoint(
+    request: Request,
     user_id: str = Form(None),
     user_name: str = Form(None),
     file: UploadFile = File(...),
@@ -144,9 +145,12 @@ async def register_face_endpoint(
         
         # Save image to disk
         filename = f"{current_user.id}_{user_id}.jpg"
-        file_path = os.path.join(os.path.dirname(__file__), "uploads", "faces", filename)
+        uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "faces")
+        os.makedirs(uploads_dir, exist_ok=True)
+        file_path = os.path.join(uploads_dir, filename)
         cv2.imwrite(file_path, img)
-        image_url = f"/uploads/faces/{filename}"
+        base_url = str(request.base_url).rstrip("/") if request else ""
+        image_url = f"{base_url}/api/v1/uploads/faces/{filename}"
         
         # (ID uniqueness check already performed above)
         known_faces_db.append({
@@ -288,6 +292,7 @@ async def list_faces_endpoint(
     summary="Register a face without liveness verification"
 )
 async def register_face_noliveness_endpoint(
+    request: Request,
     user_id: str = Form(None),
     user_name: str = Form(None),
     file: UploadFile = File(...),
@@ -316,9 +321,12 @@ async def register_face_noliveness_endpoint(
         
         # Save image to disk
         filename = f"{current_user.id}_{user_id}.jpg"
-        file_path = os.path.join(os.path.dirname(__file__), "uploads", "faces", filename)
+        uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "faces")
+        os.makedirs(uploads_dir, exist_ok=True)
+        file_path = os.path.join(uploads_dir, filename)
         cv2.imwrite(file_path, img)
-        image_url = f"/uploads/faces/{filename}"
+        base_url = str(request.base_url).rstrip("/") if request else ""
+        image_url = f"{base_url}/api/v1/uploads/faces/{filename}"
         
         # (ID uniqueness check already performed above)
         known_faces_db.append({
@@ -346,6 +354,7 @@ async def register_face_noliveness_endpoint(
     summary="Register a face from live camera input"
 )
 async def register_face_live_endpoint(
+    request: Request,
     user_id: str = Form(None),
     user_name: str = Form(None),
     file: UploadFile = File(...),
@@ -375,9 +384,12 @@ async def register_face_live_endpoint(
         
         # Save image to disk
         filename = f"{current_user.id}_{user_id}.jpg"
-        file_path = os.path.join(os.path.dirname(__file__), "uploads", "faces", filename)
+        uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "faces")
+        os.makedirs(uploads_dir, exist_ok=True)
+        file_path = os.path.join(uploads_dir, filename)
         cv2.imwrite(file_path, img)
-        image_url = f"/uploads/faces/{filename}"
+        base_url = str(request.base_url).rstrip("/") if request else ""
+        image_url = f"{base_url}/api/v1/uploads/faces/{filename}"
         
         # (ID uniqueness check already performed above)
         known_faces_db.append({"id": user_id, "name": final_name, "embedding": embedding})
@@ -452,6 +464,7 @@ async def recognize_endpoint(file: UploadFile = File(...), current_user: db_mode
 # --- REGISTER LOGIN FACE (dedicated endpoint for face login registration) ---
 @router.post("/register-login-face", include_in_schema=False)
 async def register_login_face_endpoint(
+    request: Request,
     file: UploadFile = File(...),
     current_user: db_models.User = Depends(get_current_user),
     db_session: Session = Depends(db.get_db)
@@ -479,7 +492,8 @@ async def register_login_face_endpoint(
         filename = f"{current_user.id}_login_face.jpg"
         file_path = os.path.join(uploads_dir, filename)
         cv2.imwrite(file_path, img)
-        image_url = f"/uploads/faces/{filename}"
+        base_url = str(request.base_url).rstrip("/") if request else ""
+        image_url = f"{base_url}/api/v1/uploads/faces/{filename}"
         
         # Upsert: save_face_to_db already handles update if face_id exists
         save_face_to_db(db_session, current_user.id, face_id, face_name, embedding, image_url)
