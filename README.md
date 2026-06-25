@@ -34,6 +34,16 @@ The name comes from the Sundanese word **Raray**, meaning face.
 
 ---
 
+## How Face Embedding Works
+
+Raray Vision uses the ArcFace algorithm with a ResNet50 backbone. ArcFace applies an Additive Angular Margin Loss during training, which forces the model to learn highly discriminative features by maximizing the angular distance between different identities in the embedding space.
+
+Each detected face is aligned using 5-point facial landmarks, then passed through the ResNet50 network to produce a compact 512-dimensional float32 vector (embedding). This vector is a unique numerical "fingerprint" of the face.
+
+Matching is performed using Cosine Similarity — measuring the angle between two embedding vectors. A similarity score above 0.45 (1:1 verification) or 0.50 (1:N identification) indicates a positive match.
+
+---
+
 ## Technology Stack
 
 | Layer | Technology |
@@ -108,7 +118,7 @@ Full interactive documentation:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/rarayvision.git
+git clone https://github.com/dedin7766/rarayvision.git
 cd rarayvision
 ```
 
@@ -220,7 +230,7 @@ curl http://localhost:5000/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/rarayvision.git
+git clone https://github.com/dedin7766/rarayvision.git
 cd rarayvision
 ```
 
