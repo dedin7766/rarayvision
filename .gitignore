@@ -1,0 +1,66 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+.venv/
+venv/
+.env
+.env.*
+
+# =========================
+# Database
+# =========================
+*.db
+*.sqlite
+*.sqlite3
+
+# =========================
+# Backup Files
+# =========================
+*.bak
+*.bak2
+*.tmp
+
+# =========================
+# Uploads
+# =========================
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# =========================
+# ONNX Models (Opsional)
+# =========================
+# Kalau model mau didownload manual:
+# backend/models/*.onnx
+
+# Kalau model mau ikut repo, HAPUS baris di atas.
+
+# =========================
+# Node / Frontend
+# =========================
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# =========================
+# OS / Editor
+# =========================
+.DS_Store
+.vscode/
+.idea/
+
+# =========================
+# Logs
+# =========================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
