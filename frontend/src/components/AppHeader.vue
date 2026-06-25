@@ -54,7 +54,7 @@ const goTo = (path) => {
         <a v-if="store.isLoggedIn" href="#" :class="{ active: $route.path === '/tester' }" @click.prevent="goTo('/tester')">Tester</a>
         <a v-if="store.isLoggedIn" href="#" :class="{ active: $route.path === '/live' }" @click.prevent="goTo('/live')">Live</a>
         <a href="#" :class="{ active: $route.path === '/about' }" @click.prevent="goTo('/about')">About</a>
-        <a href="#" :class="{ active: $route.path === '/feedback' }" @click.prevent="goTo('/feedback')">Feedback</a>
+        <a href="#" :class="{ active: $route.path === '/installation' }" @click.prevent="goTo('/installation')">Installation</a>
         <!-- Docs dropdown -->
         <div class="docs-menu-wrap" style="position: relative; display: inline-flex;">
           <button type="button" class="docs-btn" @click.stop="toggleDocsDropdown">
@@ -63,10 +63,7 @@ const goTo = (path) => {
           </button>
           <div v-if="showDocsDropdown" class="profile-dropdown-overlay" @click="closeDocsDropdown" style="position:fixed; inset:0; z-index:40;"></div>
           <div v-if="showDocsDropdown" class="profile-dropdown docs-dropdown" style="z-index:50; left:0; right:auto;">
-            <a href="#" @click.prevent="goTo('/installation'); closeDocsDropdown()" style="display:flex; align-items:center; gap:8px;">
-              <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-              Installation Guide
-            </a>
+
             <a :href="`${API_BASE_URL}/redoc`" target="_blank" rel="noopener" @click="closeDocsDropdown" style="display:flex; align-items:center; gap:8px;">
               <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
               API Docs
@@ -107,12 +104,9 @@ const goTo = (path) => {
         <a v-if="store.isLoggedIn" href="#" @click.prevent="goTo('/tester')">Tester</a>
         <a v-if="store.isLoggedIn" href="#" @click.prevent="goTo('/live')">Live</a>
         <a href="#" @click.prevent="goTo('/about')">About</a>
-        <a href="#" @click.prevent="goTo('/feedback')">Feedback</a>
+        <a href="#" @click.prevent="goTo('/installation')">Installation</a>
         <!-- Docs links in mobile menu -->
-        <a href="#" @click.prevent="goTo('/installation'); closeHeaderMenu()" style="display:flex; align-items:center; gap:8px;">
-          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-          Installation Guide
-        </a>
+
         <a :href="`${API_BASE_URL}/redoc`" target="_blank" rel="noopener" @click="closeHeaderMenu" style="display:flex; align-items:center; gap:8px;">
           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           API Docs

@@ -6,14 +6,13 @@ import DashboardView from './views/DashboardView.vue'
 import TesterView from './views/TesterView.vue'
 import LiveView from './views/LiveView.vue'
 import AboutView from './views/AboutView.vue'
-import FeedbackView from './views/FeedbackView.vue'
 import InstallationView from './views/InstallationView.vue'
 
 const routes = [
   { path: '/', component: LandingView },
   { path: '/login', component: LoginView },
   { path: '/about', component: AboutView },
-  { path: '/feedback', component: FeedbackView },
+  { path: '/feedback', redirect: '/about' },
   { path: '/installation', component: InstallationView },
   {
     path: '/dashboard',

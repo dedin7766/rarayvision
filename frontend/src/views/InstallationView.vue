@@ -4,6 +4,26 @@ import { onMounted } from 'vue'
 onMounted(() => {
   window.scrollTo(0, 0)
 })
+
+const copyCode = (event) => {
+  const btn = event.currentTarget;
+  const container = btn.parentElement;
+  const preEl = container.querySelector('pre');
+  if (preEl) {
+    navigator.clipboard.writeText(preEl.innerText).then(() => {
+      btn.classList.add('copied');
+      const iconSpan = btn.querySelector('.icon');
+      if (iconSpan) {
+        const originalHTML = iconSpan.innerHTML;
+        iconSpan.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`;
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          iconSpan.innerHTML = originalHTML;
+        }, 2000);
+      }
+    });
+  }
+}
 </script>
 
 <template>
@@ -57,7 +77,7 @@ onMounted(() => {
         </div>
         <div class="prereq-card">
           <div class="prereq-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
           </div>
           <div>
             <strong>Memory</strong>
@@ -75,7 +95,7 @@ onMounted(() => {
         </div>
         <div class="prereq-card">
           <div class="prereq-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
           </div>
           <div>
             <strong>Internet</strong>
@@ -98,7 +118,12 @@ onMounted(() => {
           <div class="step-body">
             <h3>Clone the repository</h3>
             <div class="code-block">
-              <pre>git clone https://github.com/your-username/rarayvision.git
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
+              <pre>git clone https://github.com/dedin7766/rarayvision.git
 cd rarayvision</pre>
             </div>
           </div>
@@ -110,6 +135,11 @@ cd rarayvision</pre>
             <h3>Create the environment file</h3>
             <p>Create a <code>.env</code> file in the project root:</p>
             <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
               <pre>DATABASE_URL=mysql+pymysql://raray:yourpassword@db:3306/rarayvision
 SECRET_KEY=your-secret-key-here
 ALGORITHM=HS256
@@ -123,6 +153,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES=1440</pre>
           <div class="step-body">
             <h3>Create the Dockerfile</h3>
             <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
               <pre>FROM python:3.11-slim
 
 WORKDIR /app
@@ -152,6 +187,11 @@ CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "5000"]</pre>
           <div class="step-body">
             <h3>Create docker-compose.yml</h3>
             <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
               <pre>version: "3.9"
 
 services:
@@ -190,6 +230,11 @@ volumes:
           <div class="step-body">
             <h3>Build and start</h3>
             <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
               <pre>docker compose up --build -d</pre>
             </div>
           </div>
@@ -200,6 +245,11 @@ volumes:
           <div class="step-body">
             <h3>Verify the service</h3>
             <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
               <pre>curl http://localhost:5000/
 # Expected response:
 # {"message":"Raray Vision API MVC is running"}</pre>
@@ -227,7 +277,12 @@ volumes:
           <div class="step-body">
             <h3>Clone and enter the project</h3>
             <div class="code-block">
-              <pre>git clone https://github.com/your-username/rarayvision.git
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
+              <pre>git clone https://github.com/dedin7766/rarayvision.git
 cd rarayvision</pre>
             </div>
           </div>
@@ -238,6 +293,11 @@ cd rarayvision</pre>
           <div class="step-body">
             <h3>Install Python dependencies</h3>
             <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
               <pre>python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt</pre>
@@ -251,6 +311,11 @@ pip install -r requirements.txt</pre>
             <h3>Set up the database</h3>
             <p>Run these commands in MySQL / MariaDB:</p>
             <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
               <pre>CREATE DATABASE rarayvision CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'raray'@'localhost' IDENTIFIED BY 'yourpassword';
 GRANT ALL PRIVILEGES ON rarayvision.* TO 'raray'@'localhost';
@@ -265,6 +330,11 @@ FLUSH PRIVILEGES;</pre>
             <h3>Configure environment variables</h3>
             <p>Export these in your shell or add to <code>/etc/environment</code>:</p>
             <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
               <pre>export DATABASE_URL="mysql+pymysql://raray:yourpassword@localhost:3306/rarayvision"
 export SECRET_KEY="your-secret-key-here"
 export ALGORITHM="HS256"
@@ -279,6 +349,11 @@ export ACCESS_TOKEN_EXPIRE_MINUTES="1440"</pre>
             <h3>Place ONNX model files</h3>
             <p>Copy your model files into <code>backend/models/</code>:</p>
             <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
               <pre>backend/models/
   best_model_quantized.onnx   # Anti-spoofing model
   emotion-ferplus-8.onnx      # Emotion detection model</pre>
@@ -292,6 +367,11 @@ export ACCESS_TOKEN_EXPIRE_MINUTES="1440"</pre>
           <div class="step-body">
             <h3>Start with PM2</h3>
             <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
               <pre>npm install -g pm2
 pm2 start ecosystem.config.js
 pm2 save
@@ -305,6 +385,11 @@ pm2 startup</pre>
           <div class="step-body">
             <h3>Build and serve the frontend</h3>
             <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
               <pre>cd frontend
 npm install
 npm run build</pre>
@@ -322,6 +407,11 @@ npm run build</pre>
       <p class="section-desc">Configure Nginx as a reverse proxy for both the frontend and backend API.</p>
 
       <div class="code-block">
+        <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+          <span class="icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          </span>
+        </button>
         <pre>server {
     listen 80;
     server_name yourdomain.com;
@@ -363,6 +453,11 @@ npm run build</pre>
       </div>
 
       <div class="code-block" style="margin-top: 1.5rem;">
+        <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+          <span class="icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          </span>
+        </button>
         <pre># Enable and reload
 ln -s /etc/nginx/sites-available/rarayvision /etc/nginx/sites-enabled/
 nginx -t
@@ -385,6 +480,11 @@ certbot --nginx -d yourdomain.com</pre>
           <div class="step-body">
             <h3>Register an account</h3>
             <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
               <pre>curl -X POST https://yourdomain.com/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"yourpassword","name":"Your Name"}'</pre>
@@ -397,6 +497,11 @@ certbot --nginx -d yourdomain.com</pre>
           <div class="step-body">
             <h3>Login and get a token</h3>
             <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
               <pre>curl -X POST https://yourdomain.com/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"yourpassword"}'
@@ -412,6 +517,11 @@ certbot --nginx -d yourdomain.com</pre>
           <div class="step-body">
             <h3>Use the token in requests</h3>
             <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
               <pre>curl -X POST https://yourdomain.com/api/v1/recognize \
   -H "Authorization: Bearer eyJ..." \
   -F "file=@photo.jpg"</pre>
@@ -506,16 +616,13 @@ h1 {
   margin-bottom: 4rem;
 }
 .section-label {
-  display: inline-block;
-  background: #ede9fe;
+  display: block;
   color: #6366f1;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  padding: 4px 12px;
-  border-radius: 99px;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 .section-title {
   font-size: 1.9rem;
@@ -621,6 +728,46 @@ h1 {
   border-radius: 10px;
   padding: 1.25rem 1.5rem;
   overflow-x: auto;
+  position: relative;
+}
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.copy-btn .icon svg {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.copy-btn.copied .icon svg {
+  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.5) rotate(-10deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
 }
 .code-block pre {
   margin: 0;

@@ -1,9 +1,49 @@
 <script setup>
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
+import { API_BASE_URL } from '../utils'
+
+const name = ref('')
+const email = ref('')
+const message = ref('')
+const status = ref('')
+const loading = ref(false)
 
 onMounted(() => {
   window.scrollTo(0, 0)
 })
+
+const submitFeedback = async () => {
+  if (!name.value || !email.value || !message.value) {
+    status.value = 'Please fill out all fields.'
+    return
+  }
+  loading.value = true
+  status.value = 'Sending...'
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/v1/feedback`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name.value,
+        email: email.value,
+        message: message.value
+      })
+    })
+    const data = await res.json()
+    if (data.status === 'success') {
+      status.value = 'Thank you! Your feedback has been sent successfully.'
+      name.value = ''
+      email.value = ''
+      message.value = ''
+    } else {
+      status.value = `Error: ${data.message || 'Failed to send feedback'}`
+    }
+  } catch (err) {
+    status.value = `Error: ${err.message}`
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
@@ -20,36 +60,28 @@ onMounted(() => {
     <div style="display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); margin-bottom: 4rem;">
       <!-- Card 1 -->
       <div style="background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-        <div style="background: #0f172a; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; color: white;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        </div>
+
         <h3 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem 0;">FastAPI Backend</h3>
         <p style="color: #64748b; margin: 0; line-height: 1.6;">Powered by Python's FastAPI, delivering asynchronous, ultra-fast HTTP request handling and automatic Swagger UI generation.</p>
       </div>
 
       <!-- Card 2 -->
       <div style="background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-        <div style="background: #0f172a; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; color: white;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        </div>
+
         <h3 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem 0;">YuNet & OpenCV</h3>
         <p style="color: #64748b; margin: 0; line-height: 1.6;">Utilizes OpenCV and the highly efficient YuNet model to detect faces and facial landmarks in milliseconds with pinpoint accuracy.</p>
       </div>
 
       <!-- Card 3 -->
       <div style="background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-        <div style="background: #0f172a; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; color: white;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-        </div>
+
         <h3 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem 0;">InsightFace</h3>
         <p style="color: #64748b; margin: 0; line-height: 1.6;">Powered by the incredibly sophisticated <strong>insightface</strong> library and state-of-the-art embedding extraction algorithms, converting facial features into vectors for unmatched matching precision.</p>
       </div>
 
       <!-- Card 4 -->
       <div style="background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-        <div style="background: #0f172a; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; color: white;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
+
         <h3 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem 0;">Liveness</h3>
         <p style="color: #64748b; margin: 0; line-height: 1.6;">Integrated Anti-Spoofing checks using ONNX Runtime to distinguish real human faces from printed photos or screens in real-time.</p>
       </div>
@@ -84,10 +116,10 @@ onMounted(() => {
         <div style="background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
           <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1.25rem; color: #0f172a; display: flex; align-items: center; gap: 0.5rem;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
-            Computer Vision & AI
+            Computer Vision &amp; AI
           </h3>
           <ul style="list-style: none; padding: 0; margin: 0; color: #475569; display: flex; flex-direction: column; gap: 0.75rem;">
-            <li><strong style="color: #0f172a;">InsightFace</strong> — State-of-the-art face analysis framework.</li>
+            <li><strong style="color: #0f172a;">InsightFace (buffalo_l)</strong> — State-of-the-art face analysis framework providing detection, alignment, and embedding in a single pipeline.</li>
             <li><strong style="color: #0f172a;">ArcFace (ResNet50)</strong> — 512-dimensional facial embeddings for high-accuracy 1:1 and 1:N face recognition.</li>
             <li><strong style="color: #0f172a;">ONNX Runtime</strong> — High-performance inference engine.</li>
             <li><strong style="color: #0f172a;">OpenCV</strong> — Computer vision operations.</li>
@@ -154,6 +186,39 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- Feedback Section -->
+    <div style="margin-bottom: 4rem;">
+      <div style="text-align: center; margin-bottom: 3rem;">
+        <p style="text-transform: uppercase; letter-spacing: 2px; color: #6366f1; font-weight: 700; margin-bottom: 0.5rem; font-size: 0.9rem;">We Value Your Input</p>
+        <h2 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em;">Send Feedback</h2>
+        <p style="font-size: 1.1rem; color: #475569; max-width: 600px; margin: 1rem auto 0; line-height: 1.6;">
+          Have a suggestion, found a bug, or want to request a feature? Let us know below!
+        </p>
+      </div>
+      <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); border: 1px solid #f1f5f9;">
+        <form @submit.prevent="submitFeedback" style="display: flex; flex-direction: column; gap: 1.5rem;">
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #334155;">Your Name</label>
+            <input type="text" v-model="name" placeholder="John Doe" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; outline: none; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#000'" onblur="this.style.borderColor='#cbd5e1'" />
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #334155;">Email Address</label>
+            <input type="email" v-model="email" placeholder="john@example.com" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; outline: none; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#000'" onblur="this.style.borderColor='#cbd5e1'" />
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #334155;">Message</label>
+            <textarea v-model="message" rows="5" placeholder="Write your suggestions, bugs, or questions here..." required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; outline: none; resize: vertical; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#000'" onblur="this.style.borderColor='#cbd5e1'"></textarea>
+          </div>
+          <button type="submit" :disabled="loading" style="background: #000; color: white; padding: 1rem; border-radius: 8px; font-weight: 700; font-size: 1rem; border: none; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#000'">
+            {{ loading ? 'Sending...' : 'Send Feedback' }}
+          </button>
+        </form>
+        <div v-if="status" style="margin-top: 1.5rem; padding: 1rem; border-radius: 8px; font-weight: 600; text-align: center;" :style="status.includes('Error') ? 'background:#fef2f2;color:#ef4444;' : 'background:#f0fdf4;color:#16a34a;'">
+          {{ status }}
+        </div>
+      </div>
+    </div>
+
     <!-- Footer Banner -->
     <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 24px; padding: 4rem 2rem; text-align: center; color: white;">
       <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">Open by Design, Built for Innovation</h2>
@@ -161,7 +226,7 @@ onMounted(() => {
         Designed to accelerate AI development, Raray Vision brings enterprise-grade facial recognition to the community. Build, scale, and integrate advanced computer vision into your applications without commercial barriers or restrictive limits.
       </p>
       <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-        <a href="https://apirv.dfs.co.id/docs" target="_blank" style="display: inline-flex; align-items: center; background: #6366f1; color: white; padding: 1rem 2rem; border-radius: 99px; font-weight: 700; text-decoration: none; transition: background 0.2s;" onmouseover="this.style.background='#4f46e5'" onmouseout="this.style.background='#6366f1'">
+        <a href="https://apirv.dfs.co.id/redoc" target="_blank" style="display: inline-flex; align-items: center; background: #6366f1; color: white; padding: 1rem 2rem; border-radius: 99px; font-weight: 700; text-decoration: none; transition: background 0.2s;" onmouseover="this.style.background='#4f46e5'" onmouseout="this.style.background='#6366f1'">
           Explore API Documentation
         </a>
         <a href="https://github.com" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #ffffff; color: #0f172a; padding: 1rem 2rem; border-radius: 99px; font-weight: 700; text-decoration: none; transition: background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#ffffff'">
