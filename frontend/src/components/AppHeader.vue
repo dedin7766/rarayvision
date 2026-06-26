@@ -54,7 +54,6 @@ const goTo = (path) => {
         <a v-if="store.isLoggedIn" href="#" :class="{ active: $route.path === '/tester' }" @click.prevent="goTo('/tester')">Tester</a>
         <a v-if="store.isLoggedIn" href="#" :class="{ active: $route.path === '/live' }" @click.prevent="goTo('/live')">Live</a>
         <a href="#" :class="{ active: $route.path === '/about' }" @click.prevent="goTo('/about')">About</a>
-        <a href="#" :class="{ active: $route.path === '/installation' }" @click.prevent="goTo('/installation')">Installation</a>
         <!-- Docs dropdown -->
         <div class="docs-menu-wrap" style="position: relative; display: inline-flex;">
           <button type="button" class="docs-btn" @click.stop="toggleDocsDropdown">
@@ -105,7 +104,6 @@ const goTo = (path) => {
         <a v-if="store.isLoggedIn" href="#" @click.prevent="goTo('/tester')">Tester</a>
         <a v-if="store.isLoggedIn" href="#" @click.prevent="goTo('/live')">Live</a>
         <a href="#" @click.prevent="goTo('/about')">About</a>
-        <a href="#" @click.prevent="goTo('/installation')">Installation</a>
         <!-- Docs links in mobile menu -->
 
         <a :href="`${API_BASE_URL}/redoc`" target="_blank" rel="noopener" @click="closeHeaderMenu" style="display:flex; align-items:center; gap:8px;">
