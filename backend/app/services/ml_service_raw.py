@@ -22,18 +22,12 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 import backend.database as db
-
-# JWT Secret Key
-SECRET_KEY = "RARAYVISION_SECRET_KEY_CHANGE_ME"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 days
+from backend.app.core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 # ================= KONFIGURASI =================
 # Path model anti-spoofing di folder models/ (satu level di atas backend)
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 ANTI_SPOOF_MODEL_PATH = os.path.join(BASE_DIR, "models", "best_model_quantized.onnx")
 EMOTION_MODEL_PATH = os.path.join(BASE_DIR, "models", "emotion-ferplus-8.onnx")
-# URL CodeIgniter API (Main Server)
-CI_BASE_URL = "https://apihrisglobal.proximasuite.com/Api_user"
 # ===============================================
 
 from fastapi.staticfiles import StaticFiles
@@ -528,24 +522,12 @@ def process_compare_logic(img, user_id, tenant_faces):
     # if not is_real:
     #     return {"status": "error", "message": "Spoof face detected"}
 
-    # 1. Search in RAM first (fast path)
+    # 1. Search in RAM
     user_data = next((u for u in known_faces_db if str(u["id"]) == str(user_id)), None)
     target_embedding_db = None
 
     if user_data:
         target_embedding_db = user_data['embedding']
-    else:
-        # 2. If not found in RAM, fetch from the main server (CodeIgniter)
-        try:
-            url = f"{CI_BASE_URL}/get_face_by_id/{user_id}" 
-            resp = requests.get(url, timeout=5)
-            if resp.status_code == 200:
-                data = resp.json()
-                if data and 'face_embedding' in data:
-                    emb_list = json.loads(data['face_embedding'])
-                    target_embedding_db = np.array(emb_list, dtype=np.float32)
-        except Exception as e:
-            print(f"Error fetch CI: {e}")
 
     if target_embedding_db is None:
         return {"status": "error", "message": "User face is not registered"}

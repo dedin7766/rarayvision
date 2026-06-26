@@ -76,7 +76,7 @@ def login_user(req: LoginRequest, db_session: Session = Depends(db.get_db)):
     token = create_access_token({"sub": str(user.id)})
     return {"status": "success", "token": token, "user_id": user.id, "email": user.email}
 
-GOOGLE_CLIENT_ID = "282777297757-tmh830klh32ve5j1lm7h9357m7othvoc.apps.googleusercontent.com"
+from backend.app.core.config import GOOGLE_CLIENT_ID
 
 @router.post("/google", include_in_schema=False)
 def google_login(req: GoogleLoginRequest, db_session: Session = Depends(db.get_db)):

@@ -9,7 +9,7 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 from backend.app.database import database as db
 from backend.app.database import models as db_models
-from backend.app.core.config import ANTI_SPOOF_MODEL_PATH, EMOTION_MODEL_PATH, CI_BASE_URL
+from backend.app.core.config import ANTI_SPOOF_MODEL_PATH, EMOTION_MODEL_PATH
 import uuid
 import requests
 
@@ -368,24 +368,12 @@ def process_compare_logic(img, user_id, tenant_faces):
     # if not is_real:
     #     return {"status": "error", "message": "Spoof face detected"}
 
-    # 1. Search in RAM first (fast path)
+    # 1. Search in RAM
     user_data = next((u for u in known_faces_db if str(u["id"]) == str(user_id)), None)
     target_embedding_db = None
 
     if user_data:
         target_embedding_db = user_data['embedding']
-    else:
-        # 2. If not found in RAM, fetch from the main server (CodeIgniter)
-        try:
-            url = f"{CI_BASE_URL}/get_face_by_id/{user_id}" 
-            resp = requests.get(url, timeout=5)
-            if resp.status_code == 200:
-                data = resp.json()
-                if data and 'face_embedding' in data:
-                    emb_list = json.loads(data['face_embedding'])
-                    target_embedding_db = np.array(emb_list, dtype=np.float32)
-        except Exception as e:
-            print(f"Error fetch CI: {e}")
 
     if target_embedding_db is None:
         return {"status": "error", "message": "User face is not registered"}

@@ -312,9 +312,6 @@ const handleGoogleLogin = async (response) => {
           <div style="display: flex; justify-content: center; width: 100%;">
             <GoogleLogin :callback="handleGoogleLogin" prompt />
           </div>
-          <button type="button" class="register-btn" @click="isRegistering = !isRegistering">
-            {{ isRegistering ? 'Back to Login' : 'Register' }}
-          </button>
         </div>
       </template>
     </div>

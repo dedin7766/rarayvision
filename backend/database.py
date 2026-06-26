@@ -5,12 +5,7 @@ import datetime
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from passlib.context import CryptContext
-
-# MySQL Connection Details
-DB_USER = "rarayvision"
-DB_PASS = "rarayvision"
-DB_HOST = "localhost"
-DB_NAME = "rarayvision"
+from backend.app.core.config import DB_USER, DB_PASS, DB_HOST, DB_NAME
 
 SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
 
