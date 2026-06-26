@@ -415,6 +415,8 @@ npm run dev
 
 The web interface will be available at `http://localhost:5173`.
 
+*(Note: If you are running the backend on a different port, e.g., 5001, you must create a `.env` file inside the `frontend` directory with `VITE_API_BASE_URL=http://127.0.0.1:5001`)*
+
 ---
 
 ## Changing API Endpoint URL & Custom Domain

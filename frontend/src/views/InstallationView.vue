@@ -357,6 +357,9 @@ uvicorn backend.main:app --host 0.0.0.0 --port 5000 --reload</pre>
 npm install
 npm run dev</pre>
             </div>
+            <p style="margin-top: 12px; font-size: 0.9em; color: #94a3b8;">
+              <em>Note: If your backend runs on a different port (e.g., 5001), create a <code>.env</code> file inside the <code>frontend/</code> directory with <code>VITE_API_BASE_URL=http://127.0.0.1:5001</code></em>
+            </p>
           </div>
         </div>
       </div>
