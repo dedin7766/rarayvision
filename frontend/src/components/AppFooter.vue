@@ -29,7 +29,7 @@
       
       <div class="footer-bottom">
         <p>&copy; {{ new Date().getFullYear() }} Raray Vision. All rights reserved.</p>
-        <p class="security-note">
+        <p class="security-text">
           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           Enterprise-grade security. Images are processed in-memory and never stored without explicit consent.
         </p>
@@ -204,15 +204,11 @@ const showSecurityModal = ref(false)
   margin: 0;
 }
 
-.security-note {
+.security-text {
   display: flex;
   align-items: center;
-  color: #ffffff;
-  background-color: #059669;
-  padding: 6px 12px;
-  border-radius: 9999px;
+  color: #475569;
   font-size: 0.85rem;
-  font-weight: 500;
 }
 
 @media (max-width: 768px) {
