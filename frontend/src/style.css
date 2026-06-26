@@ -1807,4 +1807,7 @@ button {
     width: 100%;
     box-sizing: border-box;
   }
+  .live-feed {
+    aspect-ratio: 3 / 4;
+  }
 }
