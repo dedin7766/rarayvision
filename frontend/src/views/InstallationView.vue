@@ -243,7 +243,7 @@ FLUSH PRIVILEGES;</pre>
           <div class="step-num">4</div>
           <div class="step-body">
             <h3>Configure environment variables</h3>
-            <p>Export these in your shell or add to <code>/etc/environment</code>:</p>
+            <p>Create a <code>.env</code> file in the project root:</p>
             <div class="code-block">
               <button class="copy-btn" @click="copyCode($event)" title="Copy code">
                 <span class="icon">
