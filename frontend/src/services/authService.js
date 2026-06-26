@@ -80,7 +80,7 @@ export const authService = {
   async checkHealth() {
     try {
       store.isChecking = true
-      const res = await fetch(`${API_BASE_URL}/`)
+      const res = await fetch(`${API_BASE_URL}/health`)
       if (!res.ok) throw new Error('HTTP ' + res.status)
       store.apiStatus = 'Online'
       store.apiStatusDetail = 'Raray Vision API'

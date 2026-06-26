@@ -249,6 +249,22 @@ async def custom_http_exception_handler(request: Request, exc: StarletteHTTPExce
         return HTMLResponse(content=get_404_html(), status_code=404)
     return JSONResponse(content={"detail": exc.detail}, status_code=exc.status_code)
 
+from pydantic import BaseModel
+
+class FeedbackRequest(BaseModel):
+    name: str
+    email: str
+    message: str
+
+@fastapi_app.post("/api/v1/feedback", tags=["General"])
+def submit_feedback(feedback: FeedbackRequest):
+    print(f"Feedback received from {feedback.name} ({feedback.email}): {feedback.message}")
+    return {"status": "success", "message": "Feedback received"}
+
+@fastapi_app.get("/health", include_in_schema=False)
+def health_check():
+    return {"status": "ok", "message": "Raray Vision API is online"}
+
 # Setup Socket.IO App
 app = socketio.ASGIApp(sio, fastapi_app)
 

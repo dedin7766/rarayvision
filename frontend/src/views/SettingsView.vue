@@ -208,24 +208,26 @@ const stopCamera = () => {
 }
 
 const ensureMediaPipe = async () => {
-  if (window.FaceMesh) return
+  if (mediaPipeFaceMesh) return
   mediaPipeLoading.value = true
-  await new Promise((resolve) => {
-    const s1 = document.createElement('script')
-    s1.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js'
-    document.head.appendChild(s1)
-    s1.onload = () => {
-      const s2 = document.createElement('script')
-      s2.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js'
-      document.head.appendChild(s2)
-      s2.onload = () => {
-        const s3 = document.createElement('script')
-        s3.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js'
-        document.head.appendChild(s3)
-        s3.onload = resolve
+  if (!window.FaceMesh) {
+    await new Promise((resolve) => {
+      const s1 = document.createElement('script')
+      s1.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js'
+      document.head.appendChild(s1)
+      s1.onload = () => {
+        const s2 = document.createElement('script')
+        s2.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js'
+        document.head.appendChild(s2)
+        s2.onload = () => {
+          const s3 = document.createElement('script')
+          s3.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js'
+          document.head.appendChild(s3)
+          s3.onload = resolve
+        }
       }
-    }
-  })
+    })
+  }
   mediaPipeFaceMesh = new window.FaceMesh({locateFile: (file) => {
     return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
   }});
