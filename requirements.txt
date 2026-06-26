@@ -9,6 +9,7 @@ numpy
 python-multipart
 SQLAlchemy>=2.0.29
 PyMySQL==1.1.0
+cryptography
 passlib[bcrypt]==1.7.4
 PyJWT==2.8.0
 python-dotenv
