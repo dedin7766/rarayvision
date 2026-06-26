@@ -927,10 +927,17 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .hero-actions,
+  .hero-actions {
+    width: 100%;
+  }
+
   .primary-cta,
   .secondary-cta {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
+    padding: 10px 8px;
+    font-size: 0.9rem;
+    white-space: nowrap;
   }
 
   .stats-grid {
@@ -1554,9 +1561,9 @@ button {
 }
 
 .register-live-btn {
-  background: #2563eb;
+  background: #0f172a;
   color: #fff;
-  border: 1px solid #2563eb;
+  border: 1px solid #0f172a;
   border-radius: 10px;
   padding: 10px 16px;
   font-weight: 700;
@@ -1565,7 +1572,7 @@ button {
 }
 
 .register-live-btn:hover {
-  background: #1d4ed8;
+  background: #000000;
 }
 
 .register-success {
