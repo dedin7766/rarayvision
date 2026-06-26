@@ -1792,4 +1792,19 @@ button {
     box-sizing: border-box;
     margin-top: 0.5rem;
   }
+  .live-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .live-controls {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+  }
+  .live-controls select,
+  .live-controls button {
+    width: 100%;
+    box-sizing: border-box;
+  }
 }
