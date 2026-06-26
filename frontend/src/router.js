@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { store } from './store'
-import LandingView from './views/LandingView.vue'
 import LoginView from './views/LoginView.vue'
 import DashboardView from './views/DashboardView.vue'
 import TesterView from './views/TesterView.vue'
@@ -9,7 +8,7 @@ import AboutView from './views/AboutView.vue'
 import InstallationView from './views/InstallationView.vue'
 
 const routes = [
-  { path: '/', component: LandingView },
+  { path: '/', redirect: '/login' },
   { path: '/login', component: LoginView },
   { path: '/about', component: AboutView },
   { path: '/feedback', redirect: '/about' },

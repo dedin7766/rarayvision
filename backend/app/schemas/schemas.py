@@ -24,6 +24,7 @@ class FeedbackRequest(BaseModel):
 
 class UpdateProfileRequest(BaseModel):
     name: str
+    email: str
 
 class UpdatePasswordRequest(BaseModel):
     current_password: Optional[str] = None

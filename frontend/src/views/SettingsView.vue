@@ -12,14 +12,15 @@ const registerError = ref('')
 const hasRegisteredFace = ref(false)
 const isCheckingStatus = ref(true)
 
-// Profile / Edit Name
+// Profile
 const userName = ref('')
 const userEmail = ref('')
-const isEditingName = ref(false)
+const isEditingProfile = ref(false)
 const editNameValue = ref('')
-const isSavingName = ref(false)
-const nameSuccess = ref('')
-const nameError = ref('')
+const editEmailValue = ref('')
+const isSavingProfile = ref(false)
+const profileSuccess = ref('')
+const profileError = ref('')
 
 // Password
 const isEditingPassword = ref(false)
@@ -54,45 +55,47 @@ const fetchProfile = async () => {
   }
 }
 
-const startEditName = () => {
+const startEditProfile = () => {
   editNameValue.value = userName.value
-  isEditingName.value = true
-  nameSuccess.value = ''
-  nameError.value = ''
+  editEmailValue.value = userEmail.value
+  isEditingProfile.value = true
+  profileSuccess.value = ''
+  profileError.value = ''
 }
 
-const cancelEditName = () => {
-  isEditingName.value = false
-  nameError.value = ''
+const cancelEditProfile = () => {
+  isEditingProfile.value = false
+  profileError.value = ''
 }
 
-const saveName = async () => {
-  if (!editNameValue.value.trim()) {
-    nameError.value = 'Name cannot be empty.'
+const saveProfile = async () => {
+  if (!editNameValue.value.trim() || !editEmailValue.value.trim()) {
+    profileError.value = 'Name and email cannot be empty.'
     return
   }
-  isSavingName.value = true
-  nameError.value = ''
-  nameSuccess.value = ''
+  isSavingProfile.value = true
+  profileError.value = ''
+  profileSuccess.value = ''
   try {
     const res = await fetch(`${API_BASE_URL}/api/v1/auth/update-profile`, {
       method: 'PUT',
       headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: editNameValue.value.trim() })
+      body: JSON.stringify({ name: editNameValue.value.trim(), email: editEmailValue.value.trim() })
     })
     const data = await res.json()
     if (res.ok && data.status === 'success') {
       userName.value = data.user.name
-      isEditingName.value = false
-      nameSuccess.value = 'Name updated successfully!'
-      setTimeout(() => { nameSuccess.value = '' }, 3000)
+      userEmail.value = data.user.email
+      isEditingProfile.value = false
+      profileSuccess.value = 'Profile updated successfully!'
+      setTimeout(() => { profileSuccess.value = '' }, 3000)
     } else {
-      nameError.value = data.detail || 'Failed to update name.'
+      profileError.value = data.detail || 'Failed to update profile.'
     }
   } catch (e) {
-    nameError.value = `Error: ${e.message}`
+    profileError.value = `Error: ${e.message}`
   } finally {
-    isSavingName.value = false
+    isSavingProfile.value = false
   }
 }
 
@@ -355,41 +358,59 @@ onUnmounted(() => {
     <div class="card" style="margin-top: 24px;">
       <h3 style="margin-bottom: 16px;">Profile</h3>
       
-      <div class="profile-field">
-        <label class="field-label">Email</label>
-        <p class="field-value">{{ userEmail }}</p>
-      </div>
-
-      <div class="profile-field">
-        <label class="field-label">Name</label>
-        <div v-if="!isEditingName" class="field-row">
-          <p class="field-value">{{ userName || '—' }}</p>
-          <button class="edit-btn" @click="startEditName">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-            Edit
-          </button>
-        </div>
-        <div v-else class="edit-name-form">
-          <input
-            v-model="editNameValue"
-            type="text"
-            placeholder="Enter your name"
-            class="name-input"
-            @keyup.enter="saveName"
-          />
-          <div class="edit-name-actions">
-            <button class="primary-btn save-name-btn" @click="saveName" :disabled="isSavingName">
-              {{ isSavingName ? 'Saving...' : 'Save' }}
+      <div v-if="!isEditingProfile">
+        <div class="profile-field">
+          <label class="field-label">Email</label>
+          <div class="field-row">
+            <p class="field-value">{{ userEmail }}</p>
+            <button class="edit-btn" @click="startEditProfile">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              Edit
             </button>
-            <button class="cancel-name-btn" @click="cancelEditName">Cancel</button>
           </div>
         </div>
-        <p v-if="nameError" class="inline-error">{{ nameError }}</p>
+
+        <div class="profile-field">
+          <label class="field-label">Name</label>
+          <p class="field-value">{{ userName || '—' }}</p>
+        </div>
+      </div>
+      
+      <div v-else class="profile-field">
+        <div class="edit-name-form" style="flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 12px;">
+          <div>
+            <label class="field-label" style="margin-bottom: 4px;">Email</label>
+            <input
+              v-model="editEmailValue"
+              type="email"
+              placeholder="Enter your email"
+              class="name-input"
+              @keyup.enter="saveProfile"
+            />
+          </div>
+          <div>
+            <label class="field-label" style="margin-bottom: 4px;">Name</label>
+            <input
+              v-model="editNameValue"
+              type="text"
+              placeholder="Enter your name"
+              class="name-input"
+              @keyup.enter="saveProfile"
+            />
+          </div>
+        </div>
+        <div class="edit-name-actions">
+          <button class="primary-btn save-name-btn" @click="saveProfile" :disabled="isSavingProfile">
+            {{ isSavingProfile ? 'Saving...' : 'Save Profile' }}
+          </button>
+          <button class="cancel-name-btn" @click="cancelEditProfile">Cancel</button>
+        </div>
+        <p v-if="profileError" class="inline-error" style="margin-top: 8px;">{{ profileError }}</p>
       </div>
 
-      <div v-if="nameSuccess" class="inline-success">
+      <div v-if="profileSuccess" class="inline-success">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-        {{ nameSuccess }}
+        {{ profileSuccess }}
       </div>
       
       <div class="profile-field" style="margin-top: 24px;">

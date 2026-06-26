@@ -29,6 +29,12 @@ def get_me(current_user: db_models.User = Depends(get_current_user)):
 
 @router.put("/update-profile", include_in_schema=False)
 def update_profile(req: UpdateProfileRequest, db_session: Session = Depends(db.get_db), current_user: db_models.User = Depends(get_current_user)):
+    if req.email != current_user.email:
+        existing = db_session.query(db_models.User).filter(db_models.User.email == req.email).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Email is already taken")
+        current_user.email = req.email.strip()
+        
     current_user.name = req.name.strip()
     db_session.commit()
     db_session.refresh(current_user)
@@ -40,7 +46,6 @@ def update_profile(req: UpdateProfileRequest, db_session: Session = Depends(db.g
             "name": current_user.name or ""
         }
     }
-
 
 @router.put("/update-password", include_in_schema=False)
 def update_password(req: UpdatePasswordRequest, db_session: Session = Depends(db.get_db), current_user: db_models.User = Depends(get_current_user)):
@@ -75,33 +80,6 @@ def login_user(req: LoginRequest, db_session: Session = Depends(db.get_db)):
     
     token = create_access_token({"sub": str(user.id)})
     return {"status": "success", "token": token, "user_id": user.id, "email": user.email}
-
-from backend.app.core.config import GOOGLE_CLIENT_ID
-
-@router.post("/google", include_in_schema=False)
-def google_login(req: GoogleLoginRequest, db_session: Session = Depends(db.get_db)):
-    try:
-        idinfo = id_token.verify_oauth2_token(req.credential, google_requests.Request(), GOOGLE_CLIENT_ID)
-        email = idinfo.get("email")
-        name = idinfo.get("name")
-        picture = idinfo.get("picture")
-        
-        user = db_session.query(db_models.User).filter(db_models.User.email == email).first()
-        if not user:
-            user = db_models.User(email=email, name=name, avatar_url=picture, password_hash=None)
-            db_session.add(user)
-            db_session.commit()
-            db_session.refresh(user)
-        else:
-            if picture and user.avatar_url != picture:
-                user.avatar_url = picture
-                db_session.commit()
-            
-            
-        token = create_access_token({"sub": str(user.id)})
-        return {"status": "success", "token": token, "user_id": user.id, "email": user.email}
-    except ValueError:
-        raise HTTPException(status_code=401, detail="Invalid Google token")
 
 @router.post("/login-face", include_in_schema=False)
 async def login_user_face(file: UploadFile = File(...), db_session: Session = Depends(db.get_db)):
