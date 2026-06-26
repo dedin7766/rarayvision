@@ -18,6 +18,7 @@ from backend.app.services.ml_service import (
     process_register_live,
     process_recognize_logic,
     process_recognize_live,
+    process_recognize_multi,
     get_tenant_faces,
     save_face_to_db,
     delete_face_from_db,
@@ -33,6 +34,8 @@ router = APIRouter(prefix="/api/v1")
     summary="Verify face liveness and detect spoof attacks",
     description="""
 Verify whether a face is real or spoofed using a custom ONNX anti-spoofing model.
+
+**Note:** This endpoint is exclusively designed to process real-time live streaming frames directly from a camera. It does NOT support processing raw image file uploads.
 
 Supported detections:
 - Printed photos
@@ -417,10 +420,12 @@ async def register_face_live_endpoint(
 Real-time face recognition supporting multiple modes:
 
 - identify
-- liveness
+- liveness (Anti-Spoofing & Active KYC)
 - emotion
 - attributes
 - analyze
+
+**Note:** This endpoint is exclusively designed to process real-time live streaming frames directly from a camera. It does NOT support processing raw image file uploads.
 """
 )
 async def recognize_live_endpoint(file: UploadFile = File(...), mode: str = Form("identify"), current_user: db_models.User = Depends(get_current_user), db_session: Session = Depends(db.get_db)):
@@ -460,6 +465,52 @@ async def recognize_endpoint(file: UploadFile = File(...), current_user: db_mode
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
+@router.post(
+    "/recognize-multi",
+    tags=["Recognition"],
+    summary="Identify multiple faces in a single uploaded image",
+    description="""
+Perform 1:N face identification for **multiple faces** present in an uploaded raw image file.
+This endpoint returns an array of recognized faces along with their bounding boxes.
+"""
+)
+async def recognize_multi_endpoint(file: UploadFile = File(...), current_user: db_models.User = Depends(get_current_user), db_session: Session = Depends(db.get_db)):
+    try:
+        contents = await file.read()
+        nparr = np.frombuffer(contents, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if img is None: return {"status": "error", "message": "Invalid or corrupted image"}
+        
+        loop = asyncio.get_running_loop()
+        tenant_faces = get_tenant_faces(db_session, current_user.id)
+        result = await loop.run_in_executor(thread_pool, process_recognize_multi, img, tenant_faces)
+        return result
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@router.post(
+    "/recognize-live-multi",
+    tags=["Recognition"],
+    summary="Identify multiple faces in a real-time live stream frame",
+    description="""
+Perform 1:N face identification for **multiple faces** present in a live streaming frame.
+**Note:** This endpoint is exclusively designed for live camera feeds, returning an array of recognized faces.
+"""
+)
+async def recognize_live_multi_endpoint(file: UploadFile = File(...), current_user: db_models.User = Depends(get_current_user), db_session: Session = Depends(db.get_db)):
+    try:
+        contents = await file.read()
+        nparr = np.frombuffer(contents, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if img is None:
+            return {"status": "error", "message": "Invalid or corrupted image"}
+
+        loop = asyncio.get_running_loop()
+        tenant_faces = get_tenant_faces(db_session, current_user.id)
+        result = await loop.run_in_executor(thread_pool, process_recognize_multi, img, tenant_faces)
+        return result
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 # --- REGISTER LOGIN FACE (dedicated endpoint for face login registration) ---
 @router.post("/register-login-face", include_in_schema=False)

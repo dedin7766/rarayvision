@@ -44,6 +44,39 @@ export const authService = {
     return { success: false, error: data.detail || 'Face recognition failed' }
   },
 
+  async googleLogin(credential) {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/google`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential })
+    })
+    const data = await res.json()
+    if (res.ok && data.token) {
+      localStorage.setItem('rarayvision-token', data.token)
+      store.isLoggedIn = true
+      return { success: true }
+    }
+    return { success: false, error: data.detail || 'Google login failed' }
+  },
+
+  async fetchMe() {
+    const token = localStorage.getItem('rarayvision-token')
+    if (!token) return { success: false }
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (!res.ok) throw new Error('Failed to fetch user')
+      const data = await res.json()
+      if (data.status === 'success') {
+        store.user = data.user
+        return { success: true }
+      }
+    } catch {
+      return { success: false }
+    }
+  },
+
   async checkHealth() {
     try {
       store.isChecking = true

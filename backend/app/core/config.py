@@ -9,7 +9,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 days
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # Model paths (inside backend/models/)
-ANTI_SPOOF_MODEL_PATH = os.path.join(BASE_DIR, "models", "best_model_quantized.onnx")
+ANTI_SPOOF_MODEL_PATH = os.path.join(BASE_DIR, "models", "MiniFASNetV2.onnx")
 EMOTION_MODEL_PATH = os.path.join(BASE_DIR, "models", "emotion-ferplus-8.onnx")
 
 # External Services

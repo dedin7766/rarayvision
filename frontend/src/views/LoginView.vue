@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { store } from '../store'
 import { authService } from '../services/authService'
 import { apiKeyService } from '../services/apiKeyService'
+import { GoogleLogin } from 'vue3-google-login'
 import logoImage from '../assets/logo.png'
 
 const router = useRouter()
@@ -22,6 +23,7 @@ const faceProcessing = ref(false)
 const faceRafId = ref(null)
 const faceInterval = ref(null)
 const faceError = ref('')
+const isFaceLoginSuccess = ref(false)
 
 let mediaPipeFaceMesh = null
 const mediaPipeLoading = ref(false)
@@ -33,6 +35,7 @@ const login = async () => {
   try {
     const result = await authService.login(email.value, password.value)
     if (result.success) {
+      await authService.fetchMe()
       await apiKeyService.fetch()
       router.push('/dashboard')
     } else {
@@ -66,6 +69,7 @@ const register = async () => {
 const startFaceLogin = async () => {
   showFaceLogin.value = true
   faceError.value = ''
+  isFaceLoginSuccess.value = false
   isLoading.value = true
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }, audio: false })
@@ -92,6 +96,7 @@ const stopFaceLogin = () => {
   clearInterval(faceInterval.value)
   showFaceLogin.value = false
   faceProcessing.value = false
+  isFaceLoginSuccess.value = false
   const canvas = faceCanvasEl.value
   if (canvas) {
     const ctx = canvas.getContext('2d')
@@ -188,7 +193,7 @@ const startMediaPipeLoop = () => {
 }
 
 const captureAndLoginFace = async () => {
-  if (!hasMediaPipeFace.value) return
+  // Always try to send to backend every interval so backend InsightFace can run Anti-Spoofing
   const video = faceVideoEl.value
   if (!video || video.readyState < 2 || faceProcessing.value) return
   faceProcessing.value = true
@@ -201,16 +206,22 @@ const captureAndLoginFace = async () => {
     try {
       const result = await authService.loginWithFace(blob)
       if (result.success) {
-        stopFaceLogin()
+        faceProcessing.value = true
+        clearInterval(faceInterval.value)
+        isFaceLoginSuccess.value = true
+        await authService.fetchMe()
         await apiKeyService.fetch()
-        router.push('/dashboard')
+        setTimeout(() => {
+          stopFaceLogin()
+          router.push('/dashboard')
+        }, 1500)
       } else {
         faceError.value = result.error
+        faceProcessing.value = false
       }
     } catch {
        // Ignore network errors to retry
-    } finally {
-      faceProcessing.value = false
+       faceProcessing.value = false
     }
   }, 'image/jpeg', 0.9)
 }
@@ -219,7 +230,25 @@ onUnmounted(() => {
   stopFaceLogin()
 })
 
-const loginWithGoogle = () => { alert('Google login is not connected yet.') }
+const handleGoogleLogin = async (response) => {
+  loginError.value = ''
+  isLoading.value = true
+  try {
+    const result = await authService.googleLogin(response.credential)
+    if (result.success) {
+      await authService.fetchMe()
+      await apiKeyService.fetch()
+      router.push('/dashboard')
+    } else {
+      loginError.value = result.error
+    }
+  } catch {
+    loginError.value = 'Server connection error'
+  } finally {
+    isLoading.value = false
+  }
+}
+
 </script>
 
 <template>
@@ -234,7 +263,12 @@ const loginWithGoogle = () => { alert('Google login is not connected yet.') }
       </div>
 
       <div v-if="showFaceLogin" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-        <div style="position: relative; width: 100%; max-width: 300px; aspect-ratio: 4/3; background: #0f172a; border-radius: 8px; overflow: hidden; margin-bottom: 16px;">
+        <div v-if="isFaceLoginSuccess" style="width: 100%; max-width: 400px; aspect-ratio: 4/3; background: #0f172a; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 16px; color: white;">
+          <div class="dot-typing" style="margin-bottom: 24px;"></div>
+          <p style="font-size: 16px; font-weight: 500; color: #22c55e; margin-bottom: 8px;">Login Successful!</p>
+          <p style="font-size: 14px; color: #94a3b8;">Entering workspace...</p>
+        </div>
+        <div v-else style="position: relative; width: 100%; max-width: 400px; aspect-ratio: 4/3; background: #0f172a; border-radius: 8px; overflow: hidden; margin-bottom: 16px;">
           <video ref="faceVideoEl" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);" autoplay playsinline muted></video>
           <canvas ref="faceCanvasEl" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
           <div v-if="mediaPipeLoading" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; font-size: 14px;">Loading MediaPipe...</div>
@@ -273,16 +307,11 @@ const loginWithGoogle = () => { alert('Google login is not connected yet.') }
           <button type="button" class="google-btn" @click="startFaceLogin" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; justify-content: center; gap: 8px;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>
             Login with Face
+            <span style="background: #3b82f6; color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px;">BETA</span>
           </button>
-          <button type="button" class="google-btn" @click="loginWithGoogle">
-            <svg viewBox="0 0 24 24" class="google-icon" style="width:20px;height:20px;margin-right:8px;">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-            </svg>
-            Login with Google
-          </button>
+          <div style="display: flex; justify-content: center; width: 100%;">
+            <GoogleLogin :callback="handleGoogleLogin" prompt />
+          </div>
           <button type="button" class="register-btn" @click="isRegistering = !isRegistering">
             {{ isRegistering ? 'Back to Login' : 'Register' }}
           </button>
@@ -291,3 +320,41 @@ const loginWithGoogle = () => { alert('Google login is not connected yet.') }
     </div>
   </section>
 </template>
+
+<style scoped>
+.dot-typing {
+  position: relative;
+  left: -9999px;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #22c55e;
+  color: #22c55e;
+  box-shadow: 9984px 0 0 0 #22c55e, 9999px 0 0 0 #22c55e, 10014px 0 0 0 #22c55e;
+  animation: dot-typing 1.5s infinite linear;
+}
+
+@keyframes dot-typing {
+  0% {
+    box-shadow: 9984px 0 0 0 #22c55e, 9999px 0 0 0 #22c55e, 10014px 0 0 0 #22c55e;
+  }
+  16.667% {
+    box-shadow: 9984px -10px 0 0 #22c55e, 9999px 0 0 0 #22c55e, 10014px 0 0 0 #22c55e;
+  }
+  33.333% {
+    box-shadow: 9984px 0 0 0 #22c55e, 9999px 0 0 0 #22c55e, 10014px 0 0 0 #22c55e;
+  }
+  50% {
+    box-shadow: 9984px 0 0 0 #22c55e, 9999px -10px 0 0 #22c55e, 10014px 0 0 0 #22c55e;
+  }
+  66.667% {
+    box-shadow: 9984px 0 0 0 #22c55e, 9999px 0 0 0 #22c55e, 10014px 0 0 0 #22c55e;
+  }
+  83.333% {
+    box-shadow: 9984px 0 0 0 #22c55e, 9999px 0 0 0 #22c55e, 10014px -10px 0 0 #22c55e;
+  }
+  100% {
+    box-shadow: 9984px 0 0 0 #22c55e, 9999px 0 0 0 #22c55e, 10014px 0 0 0 #22c55e;
+  }
+}
+</style>

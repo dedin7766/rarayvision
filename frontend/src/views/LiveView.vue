@@ -20,6 +20,22 @@ const targetFaceData = ref(null)
 const currentFaceData = ref(null)
 const liveMode = ref('identify')
 
+const kycStages = ['smile', 'blink', 'turn_left', 'turn_right']
+const kycCurrentStageIndex = ref(0)
+const kycCurrentStage = ref('smile')
+const kycCompleted = ref(false)
+const kycMessage = ref('Silakan tersenyum / Please smile')
+
+watch(liveMode, (newMode) => {
+  if (newMode === 'kyc') {
+    kycCurrentStageIndex.value = 0
+    kycCurrentStage.value = kycStages[0]
+    kycCompleted.value = false
+    kycMessage.value = 'Silakan tersenyum / Please smile'
+    liveResult.value = null
+  }
+})
+
 const showRegisterModal = ref(false)
 const registerUserId = ref('')
 const registerUserName = ref('')
@@ -59,7 +75,7 @@ const ensureMediaPipe = async () => {
     minTrackingConfidence: 0.5
   });
   mediaPipeFaceMesh.onResults((results) => {
-    if (liveMode.value !== 'landmark' && liveMode.value !== 'emotion' && liveMode.value !== 'identify') return
+    if (liveMode.value !== 'landmark' && liveMode.value !== 'emotion' && liveMode.value !== 'identify' && liveMode.value !== 'kyc') return
     const canvas = liveCanvasEl.value
     if (!canvas) return
     const ctx = canvas.getContext('2d')
@@ -89,6 +105,47 @@ const ensureMediaPipe = async () => {
         if (liveResult.value && liveResult.value.data) {
            if (liveResult.value.data.mask) badgeText += ' 😷 Mask'
            if (liveResult.value.data.glasses) badgeText += ' 👓 Glasses'
+        }
+      } else if (liveMode.value === 'kyc') {
+        bgColor = kycCompleted.value ? 'rgba(22,163,74,0.85)' : 'rgba(217,119,6,0.85)'
+        badgeText = kycMessage.value
+        
+        if (!kycCompleted.value && results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+          const landmarks = results.multiFaceLandmarks[0]
+          const dist = (p1, p2) => Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2))
+          const stage = kycCurrentStage.value
+          let passed = false
+          
+          if (stage === 'smile') {
+            const mouthWidth = dist(landmarks[61], landmarks[291])
+            const mouthHeight = dist(landmarks[13], landmarks[14])
+            if (mouthWidth > 0.08 && mouthHeight > 0.015) passed = true
+          } else if (stage === 'blink') {
+            const leftEyeH = dist(landmarks[159], landmarks[145])
+            const rightEyeH = dist(landmarks[386], landmarks[374])
+            if (leftEyeH < 0.01 && rightEyeH < 0.01) passed = true
+          } else if (stage === 'turn_left') {
+            const leftDist = dist(landmarks[1], landmarks[234])
+            const rightDist = dist(landmarks[1], landmarks[454])
+            if (rightDist < leftDist * 0.5) passed = true
+          } else if (stage === 'turn_right') {
+            const leftDist = dist(landmarks[1], landmarks[234])
+            const rightDist = dist(landmarks[1], landmarks[454])
+            if (leftDist < rightDist * 0.5) passed = true
+          }
+
+          if (passed) {
+            kycCurrentStageIndex.value++
+            if (kycCurrentStageIndex.value >= kycStages.length) {
+              kycCompleted.value = true
+              kycMessage.value = 'KYC Lulus! Memverifikasi...'
+            } else {
+              kycCurrentStage.value = kycStages[kycCurrentStageIndex.value]
+              if (kycCurrentStage.value === 'blink') kycMessage.value = 'Silakan berkedip / Please blink'
+              else if (kycCurrentStage.value === 'turn_left') kycMessage.value = 'Tengok ke kiri / Turn left'
+              else if (kycCurrentStage.value === 'turn_right') kycMessage.value = 'Tengok ke kanan / Turn right'
+            }
+          }
         }
       } else if (liveResult.value && liveResult.value.status === 'success') {
         if (liveResult.value.match) {
@@ -178,6 +235,8 @@ const captureAndRecognize = async () => {
   const video = liveVideoEl.value
   const canvas = liveCanvasEl.value
   if (!video || !canvas || video.readyState < 2 || liveProcessing.value) return
+  if (liveMode.value === 'kyc' && !kycCompleted.value) return
+  
   liveProcessing.value = true
   const offscreen = document.createElement('canvas')
   offscreen.width = video.videoWidth
@@ -188,16 +247,25 @@ const captureAndRecognize = async () => {
     try {
       const fd = new FormData()
       fd.append('file', blob, 'frame.jpg')
-      fd.append('mode', liveMode.value)
+      const reqMode = liveMode.value === 'kyc' ? 'identify' : liveMode.value
+      fd.append('mode', reqMode)
       const token = localStorage.getItem('rarayvision-token')
       const headers = {}
       if (token) headers['Authorization'] = `Bearer ${token}`
-      const res = await fetch(`${API_BASE_URL}/api/v1/recognize-live`, { method: 'POST', body: fd, headers })
+      const endpoint = liveMode.value === 'identify_multi' ? '/api/v1/recognize-live-multi' : '/api/v1/recognize-live'
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, { method: 'POST', body: fd, headers })
       const data = await res.json()
       liveResult.value = data
       liveFrameCount.value++
-      if (data.status === 'success' && data.data && data.data.bbox) {
-        targetFaceData.value = data.data
+      if (data.status === 'success') {
+        if (liveMode.value === 'identify_multi') {
+          targetFaceData.value = data.faces
+        } else if (data.data && data.data.bbox) {
+          targetFaceData.value = data.data
+        } else {
+          targetFaceData.value = null
+          currentFaceData.value = null
+        }
       } else {
         targetFaceData.value = null
         currentFaceData.value = null
@@ -212,7 +280,7 @@ const startRenderLoop = () => {
   let isSending = false
   const loop = async () => {
     liveRafId.value = requestAnimationFrame(loop)
-    if (liveMode.value === 'landmark' || liveMode.value === 'emotion' || liveMode.value === 'identify') {
+    if (liveMode.value === 'landmark' || liveMode.value === 'emotion' || liveMode.value === 'identify' || liveMode.value === 'kyc') {
       if (!window.FaceMesh && !mediaPipeLoading.value) {
         ensureMediaPipe()
       } else if (mediaPipeFaceMesh && !mediaPipeLoading.value && !isSending) {
@@ -251,6 +319,15 @@ const updateAndDraw = () => {
       ctx.fillStyle = '#fff'
       ctx.font = 'bold 16px Inter, sans-serif'
       ctx.fillText(liveResult.value.message || 'No face detected', 18, 31)
+    }
+    return
+  }
+  if (liveMode.value === 'identify_multi') {
+    currentFaceData.value = targetFaceData.value
+    if (Array.isArray(currentFaceData.value)) {
+      for (const face of currentFaceData.value) {
+        drawOverlay(ctx, canvas, { ...liveResult.value, mode: 'identify', data: face.data, match: face.match })
+      }
     }
     return
   }
@@ -423,12 +500,13 @@ onUnmounted(() => stopCamera())
       </div>
       <div class="live-controls">
         <select v-model="liveMode" class="mode-select">
-          <option value="identify">Identification</option>
+          <option value="identify">Identification (Single Face)</option>
+          <option value="identify_multi">Multi-Face Identification</option>
           <option value="analyze">Demographics</option>
-          <option value="liveness">Anti-Spoofing</option>
+          <option value="liveness">Active Liveness (Anti-Spoofing)</option>
           <option value="emotion">Emotion Analysis</option>
           <option value="attributes">Face Attributes</option>
-          <option value="landmark">Face Landmark</option>
+          <option value="kyc">Active Liveness</option>
         </select>
         <button v-if="liveActive" class="register-live-btn" @click="openRegisterModal">+ Register Face</button>
         <button v-if="!liveActive" class="start-btn" @click="startCamera" :disabled="liveLoading">
@@ -445,6 +523,10 @@ onUnmounted(() => stopCamera())
         <div class="live-feed" :class="{ active: liveActive }">
           <video ref="liveVideoEl" class="live-video" autoplay playsinline muted></video>
           <canvas ref="liveCanvasEl" class="live-canvas"></canvas>
+          <div v-if="mediaPipeLoading" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; font-size: 14px; z-index: 10; border-radius: 12px;">
+            <div class="live-spinner" style="margin-right: 10px;"></div>
+            Loading MediaPipe...
+          </div>
           <div v-if="!liveActive && !liveLoading" class="live-placeholder">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9A2.25 2.25 0 0013.5 5.25h-9A2.25 2.25 0 002.25 9v9A2.25 2.25 0 004.5 18.75z"/>
@@ -459,7 +541,6 @@ onUnmounted(() => stopCamera())
       </div>
 
       <div class="live-sidebar">
-
         <div class="live-result-card" v-if="liveResult">
           <p class="eyebrow">Last Result</p>
           <div class="result-body">
@@ -474,9 +555,21 @@ onUnmounted(() => stopCamera())
               <span class="result-value">{{ liveResult.message }}</span>
             </div>
             
-            <div class="result-divider" v-if="liveResult.data && liveResult.status === 'success'"></div>
+            <div class="result-divider" v-if="(liveResult.data || liveResult.faces) && liveResult.status === 'success'"></div>
             
-            <template v-if="liveResult.data && liveResult.status === 'success'">
+            <template v-if="liveMode === 'identify_multi' && liveResult.faces">
+                <div v-for="(face, idx) in liveResult.faces" :key="idx" style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+                   <div class="result-row">
+                     <span class="result-label">Face #{{ idx + 1 }}</span>
+                     <span class="result-value" :class="face.match ? 'text-green' : 'text-red'">{{ face.match ? 'Matched' : 'Unknown' }}</span>
+                   </div>
+                   <div class="result-row" v-if="face.match">
+                     <span class="result-label">Name</span>
+                     <span class="result-value">{{ face.data.name }} ({{ (face.data.similarity * 100).toFixed(1) }}%)</span>
+                   </div>
+                </div>
+            </template>
+            <template v-else-if="liveResult.data && liveResult.status === 'success'">
               <div class="result-row" v-if="liveResult.mode === 'identify'">
                 <span class="result-label">Match</span>
                 <span class="result-value" style="display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
@@ -537,6 +630,21 @@ onUnmounted(() => stopCamera())
                 </span>
               </div>
             </template>
+          </div>
+        </div>
+
+        <div class="live-result-card" v-if="liveMode === 'kyc'" style="margin-top: 16px; background: #f0fdfa; border-color: #5eead4;">
+          <p class="eyebrow" style="color: #0d9488;">Info: Active KYC Architecture</p>
+          <div class="result-body" style="background: transparent; border: none; padding: 0; margin-top: 8px; color: #0f766e; line-height: 1.5;">
+            The motion detection instructions (Smile, Blink, Turn Head) run entirely in <strong>Real-time on the Client side (Browser)</strong> using Google MediaPipe. This prevents <em>lag</em> and saves server load.<br><br>
+            After all challenges are completed, <strong>1 best photo frame is sent to the Backend</strong> for the final face recognition process.
+          </div>
+        </div>
+
+        <div class="live-result-card" v-if="liveMode === 'liveness'" style="margin-top: 16px; background: #eff6ff; border-color: #93c5fd;">
+          <p class="eyebrow" style="color: #1d4ed8;">Info: Anti-Spoofing API</p>
+          <div class="result-body" style="background: transparent; border: none; padding: 0; margin-top: 8px; color: #1e40af; line-height: 1.5;">
+            The Liveness API endpoint is strictly designed to capture and process live streaming data directly from the camera in real-time. It does <strong>not</strong> support POST requests containing raw uploaded image files.
           </div>
         </div>
       </div>

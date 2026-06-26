@@ -15,7 +15,7 @@ The name comes from the Sundanese word **Raray**, meaning face.
 - Real-time multi-mode face recognition via live camera stream
 - Face embedding and landmark extraction
 - API key authentication per tenant
-- JWT-based user authentication
+- JWT-based user authentication (Email, Google OAuth, Face Login)
 - Socket.IO real-time event support
 - Swagger UI and ReDoc documentation included
 - Fully self-hostable via Docker or bare metal
@@ -181,16 +181,24 @@ services:
 
   backend:
     build: .
+    container_name: rarayvision-backend
     restart: unless-stopped
     depends_on:
       - db
-    ports:
-      - "5000:5000"
     env_file:
       - .env
     volumes:
       - ./backend/uploads:/app/backend/uploads
       - ./backend/models:/app/backend/models
+
+  frontend:
+    build: ./frontend
+    container_name: rarayvision-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
 
 volumes:
   db_data:
@@ -205,14 +213,14 @@ docker compose up --build -d
 ### 6. Verify the service is running
 
 ```bash
-curl http://localhost:5000/
-# Expected: {"message":"Raray Vision API MVC is running"}
+curl http://localhost/
+# This will serve the Vue frontend. API is available at http://localhost/api/v1/
 ```
 
 ### 7. Access documentation
 
-- Swagger UI: `http://localhost:5000/docs`
-- ReDoc: `http://localhost:5000/redoc`
+- Swagger UI: `http://localhost/docs`
+- ReDoc: `http://localhost/redoc`
 
 ---
 
@@ -362,6 +370,35 @@ certbot --nginx -d yourdomain.com
 
 ---
 
+## Changing API Endpoint URL & Custom Domain
+
+By default, the frontend communicates with `http://127.0.0.1:5000` (for localhost) or `https://apirv.dfs.co.id` (for production). 
+If you are deploying this application to your own custom domain, you must configure the frontend to point to your new backend API URL.
+
+### 1. Update Frontend Environment Variables
+Inside the `frontend` directory, create or edit the `.env` file:
+```env
+VITE_API_BASE_URL=https://api.yourcustomdomain.com
+```
+
+### 2. Rebuild the Frontend
+After saving the `.env` file, you must rebuild the frontend for the changes to take effect:
+```bash
+cd frontend
+npm install
+npm run build
+```
+This bakes the new API URL into the static frontend files located in `frontend/dist/`.
+
+### 3. Backend API Domain (Reverse Proxy)
+Raray Vision is designed to run the frontend and backend on the **same domain**. 
+- In **Docker**, the `frontend` container includes an Nginx server that automatically proxies any request starting with `/api/` or `/docs` directly to the `backend` container.
+- In **Bare Metal**, the provided Nginx configuration (in step 8) does the exact same thing.
+
+Therefore, you only need to expose **one domain** (e.g., `https://yourcustomdomain.com`), and both your User Interface and API endpoints will be accessible seamlessly!
+
+---
+
 ## API Authentication
 
 All face endpoints require a JWT Bearer token in the `Authorization` header:
@@ -370,12 +407,28 @@ All face endpoints require a JWT Bearer token in the `Authorization` header:
 Authorization: Bearer <your-jwt-token>
 ```
 
-To obtain a token, call the login endpoint:
+To obtain a token, call one of the login endpoints:
 
+### Standard Login
 ```bash
 curl -X POST https://yourdomain.com/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"yourpassword"}'
+```
+
+### Google OAuth Login
+Pass the Google ID token obtained from the frontend `vue3-google-login` component:
+```bash
+curl -X POST https://yourdomain.com/api/v1/auth/google \
+  -H "Content-Type: application/json" \
+  -d '{"credential":"<google-id-token>"}'
+```
+
+### Face Login
+Pass an image blob to authenticate via facial recognition (requires prior registration):
+```bash
+curl -X POST https://yourdomain.com/api/v1/auth/login-face \
+  -F "file=@face.jpg"
 ```
 
 ---

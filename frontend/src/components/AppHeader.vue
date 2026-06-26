@@ -79,8 +79,9 @@ const goTo = (path) => {
           Login
         </a>
         <div v-else class="profile-menu-wrap" style="position: relative;">
-          <button type="button" class="profile-btn" @click.stop="toggleProfileDropdown">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <button type="button" class="profile-btn" @click.stop="toggleProfileDropdown" style="padding: 0; width: 36px; height: 36px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <img v-if="store.user?.avatar_url" :src="store.user.avatar_url" alt="User Avatar" style="width: 100%; height: 100%; object-fit: cover;" />
+            <svg v-else viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           </button>
           <div v-if="showProfileDropdown" class="profile-dropdown-overlay" @click="closeProfileDropdown" style="position:fixed; inset:0; z-index:40;"></div>
           <div v-if="showProfileDropdown" class="profile-dropdown" style="z-index:50;">

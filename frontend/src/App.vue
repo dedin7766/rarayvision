@@ -8,6 +8,7 @@ import AppHeader from './components/AppHeader.vue'
 onMounted(async () => {
   authService.checkHealth()
   if (store.isLoggedIn) {
+    await authService.fetchMe()
     await apiKeyService.fetch()
   }
 })

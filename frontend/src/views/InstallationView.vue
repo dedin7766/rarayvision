@@ -30,10 +30,10 @@ const copyCode = (event) => {
   <div class="install-page">
     <!-- Hero -->
     <div class="install-hero">
-      <p class="eyebrow">Self-Hosting</p>
+      <p class="eyebrow">Self-Hosted</p>
       <h1>Installation Guide</h1>
       <p class="subtitle">
-        Deploy Raray Vision on your own infrastructure using Docker or bare metal Linux.
+        Deploy <strong>Raray Vision</strong> on your own infrastructure using Docker or bare metal Linux.
         Full control, no vendor lock-in.
       </p>
       <div class="method-pills">
@@ -151,83 +151,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES=1440</pre>
         <div class="step">
           <div class="step-num">3</div>
           <div class="step-body">
-            <h3>Create the Dockerfile</h3>
-            <div class="code-block">
-              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
-                <span class="icon">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </span>
-              </button>
-              <pre>FROM python:3.11-slim
-
-WORKDIR /app
-
-RUN apt-get update &amp;&amp; apt-get install -y \
-    libgl1 \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    &amp;&amp; rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-EXPOSE 5000
-
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "5000"]</pre>
-            </div>
-          </div>
-        </div>
-
-        <div class="step">
-          <div class="step-num">4</div>
-          <div class="step-body">
-            <h3>Create docker-compose.yml</h3>
-            <div class="code-block">
-              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
-                <span class="icon">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </span>
-              </button>
-              <pre>version: "3.9"
-
-services:
-  db:
-    image: mariadb:10.11
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: rarayvision
-      MYSQL_USER: raray
-      MYSQL_PASSWORD: yourpassword
-    volumes:
-      - db_data:/var/lib/mysql
-
-  backend:
-    build: .
-    restart: unless-stopped
-    depends_on:
-      - db
-    ports:
-      - "5000:5000"
-    env_file:
-      - .env
-    volumes:
-      - ./backend/uploads:/app/backend/uploads
-      - ./backend/models:/app/backend/models
-
-volumes:
-  db_data:</pre>
-            </div>
-          </div>
-        </div>
-
-        <div class="step">
-          <div class="step-num">5</div>
-          <div class="step-body">
             <h3>Build and start</h3>
             <div class="code-block">
               <button class="copy-btn" @click="copyCode($event)" title="Copy code">
@@ -237,26 +160,18 @@ volumes:
               </button>
               <pre>docker compose up --build -d</pre>
             </div>
+            <p style="margin-top: 12px;">This will automatically build the backend, the frontend SPA, and set up MariaDB.</p>
           </div>
         </div>
 
         <div class="step">
-          <div class="step-num">6</div>
+          <div class="step-num">4</div>
           <div class="step-body">
             <h3>Verify the service</h3>
-            <div class="code-block">
-              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
-                <span class="icon">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </span>
-              </button>
-              <pre>curl http://localhost:5000/
-# Expected response:
-# {"message":"Raray Vision API MVC is running"}</pre>
-            </div>
-            <div class="success-note">
+            <p>Access the web interface at <code>http://localhost</code></p>
+            <div class="success-note" style="margin-top: 12px;">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              API documentation available at <code>http://localhost:5000/docs</code> and <code>http://localhost:5000/redoc</code>
+              API documentation available at <code>http://localhost/docs</code> and <code>http://localhost/redoc</code>
             </div>
           </div>
         </div>

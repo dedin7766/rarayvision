@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { store } from '../store'
 import { API_BASE_URL } from '../utils'
 
-const testEndpoint = ref('/api/v1/check-liveness')
+const testEndpoint = ref('/api/v1/list-faces')
 const testUserId = ref('')
 const testUserName = ref('')
 const testFile = ref(null)
@@ -12,14 +12,13 @@ const isSendingTest = ref(false)
 
 const endpointOptions = [
   { value: '/api/v1/list-faces', label: 'GET /api/v1/list-faces' },
-  { value: '/api/v1/check-liveness', label: 'POST /api/v1/check-liveness' },
   { value: '/api/v1/compare-face', label: 'POST /api/v1/compare-face' },
   { value: '/api/v1/extract-face', label: 'POST /api/v1/extract-face' },
-  { value: '/api/v1/register-face', label: 'POST /api/v1/register-face (Liveness)' },
   { value: '/api/v1/register-face-noliveness', label: 'POST /api/v1/register-face (No Liveness)' },
   { value: '/api/v1/update-face', label: 'PUT /api/v1/update-face' },
   { value: '/api/v1/delete-face', label: 'DELETE /api/v1/delete-face' },
-  { value: '/api/v1/recognize', label: 'POST /api/v1/recognize' }
+  { value: '/api/v1/recognize', label: 'POST /api/v1/recognize' },
+  { value: '/api/v1/recognize-multi', label: 'POST /api/v1/recognize-multi' }
 ]
 
 const needsUserId = computed(() =>

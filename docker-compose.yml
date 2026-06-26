@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  db:
+    image: mariadb:10.11
+    container_name: rarayvision-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: rarayvision
+      MYSQL_USER: raray
+      MYSQL_PASSWORD: yourpassword
+    volumes:
+      - db_data:/var/lib/mysql
+
+  backend:
+    build: .
+    container_name: rarayvision-backend
+    restart: unless-stopped
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./backend/uploads:/app/backend/uploads
+      - ./backend/models:/app/backend/models
+    # Ports are omitted because frontend nginx proxies requests
+
+  frontend:
+    build: ./frontend
+    container_name: rarayvision-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  db_data:

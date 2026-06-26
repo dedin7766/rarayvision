@@ -10,6 +10,9 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+class GoogleLoginRequest(BaseModel):
+    credential: str
+
 class CreateApiKeyRequest(BaseModel):
     name: str = "New Key"
     expires_in_days: Optional[int] = None
@@ -21,3 +24,7 @@ class FeedbackRequest(BaseModel):
 
 class UpdateProfileRequest(BaseModel):
     name: str
+
+class UpdatePasswordRequest(BaseModel):
+    current_password: Optional[str] = None
+    new_password: str

@@ -39,7 +39,7 @@ print(f"⏳ Loading Anti-Spoofing Model ({ANTI_SPOOF_MODEL_PATH})...")
 if os.path.exists(ANTI_SPOOF_MODEL_PATH):
     try:
         spoof_session = ort.InferenceSession(ANTI_SPOOF_MODEL_PATH, providers=['CPUExecutionProvider'])
-        print("✅ Anti-Spoofing ONNX loaded successfully!")
+        print(f"✅ Anti-Spoofing ONNX loaded successfully!")
     except Exception as e:
         print(f"❌ Error saat load ONNX: {e}")
 else:
@@ -174,35 +174,31 @@ def crop_face_for_spoof(img, bbox, kps=None, scale=2.7):
     return cropped
 
 def check_liveness(img, bbox, kps=None):
-    """Main liveness verification function — model: MiniFASNetV2SE (128x128, 2-class)"""
+    """Main liveness verification function — model: MiniFASNetV2 (80x80, 3-class)"""
     if spoof_session:
         try:
             # Scale 2.7 adalah standar MiniFASNet
             face_roi = crop_face_for_spoof(img, bbox, kps=kps, scale=2.7)
             if face_roi.size == 0 or face_roi.shape[0] < 10 or face_roi.shape[1] < 10:
                 return 0.0, False
-            # Resize ke 128x128 sesuai input model baru
-            face_roi = cv2.resize(face_roi, (128, 128))
+            # Resize ke 80x80 sesuai input model baru
+            face_roi = cv2.resize(face_roi, (80, 80))
 
-            # Konversi ke RGB karena ImageNet norm menggunakan urutan RGB
-            face_roi = cv2.cvtColor(face_roi, cv2.COLOR_BGR2RGB)
-            face_roi = face_roi.astype(np.float32) / 255.0
-            mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
-            std  = np.array([0.229, 0.224, 0.225], dtype=np.float32)
-            face_roi = (face_roi - mean) / std
+            # MiniFASNet menggunakan RAW BGR, tanpa divide by 255, tanpa normalization
+            face_roi_bgr = face_roi.astype(np.float32)
 
             # HWC -> CHW -> NCHW
-            face_roi = np.expand_dims(face_roi.transpose(2, 0, 1), axis=0)
+            face_roi_bgr = np.expand_dims(face_roi_bgr.transpose(2, 0, 1), axis=0)
 
             input_name = spoof_session.get_inputs()[0].name
-            outputs = spoof_session.run(None, {input_name: face_roi})
+            outputs = spoof_session.run(None, {input_name: face_roi_bgr})
 
             prediction = outputs[0]
             # Softmax
             exp_pred = np.exp(prediction - np.max(prediction, axis=1, keepdims=True))
             probs = exp_pred / np.sum(exp_pred, axis=1, keepdims=True)
             print(f"DEBUG PROBS: {probs[0]}")
-            # index 1 = Real, index 0 = Spoof
+            # index 1 = Real, index 0/2 = Spoof
             real_score = float(probs[0][1])
             is_real = real_score > 0.55
             return real_score, is_real
@@ -603,6 +599,54 @@ def process_recognize_logic(img, tenant_faces):
     else:
         return { "status": "success", "match": False, "message": "Face not recognized" }
 
+def process_recognize_multi(img, tenant_faces):
+    """Logic for /recognize-multi and /recognize-live-multi endpoint (multi-face identification)"""
+
+    faces = face_app.get(img)
+    if len(faces) == 0:
+        return {"status": "error", "message": "Face not detected"}
+    
+    results = []
+
+    for target_face in faces:
+        bbox = target_face.bbox.astype(int).tolist()
+        landmarks = target_face.kps.astype(int).tolist()
+        target_embedding = target_face.embedding
+        
+        base_data = {"bbox": bbox, "landmarks": landmarks}
+        
+        best_score = 0
+        best_match = None
+
+        for user in tenant_faces:
+            sim = compute_similarity(target_embedding, user['embedding'])
+            if sim > best_score:
+                best_score = sim
+                best_match = user
+                
+        if best_score > 0.50:
+            results.append({
+                "match": True,
+                "data": {
+                    "id": best_match['id'], 
+                    "name": best_match['name'], 
+                    "similarity": float(best_score),
+                    **base_data
+                }
+            })
+        else:
+            results.append({
+                "match": False,
+                "message": "Face not recognized",
+                "data": base_data
+            })
+
+    return {
+        "status": "success",
+        "mode": "identify_multi",
+        "faces": results
+    }
+
 def process_global_face_login(img, db_session):
     """Logic for global face login"""
     faces = face_app.get(img)
@@ -614,6 +658,11 @@ def process_global_face_login(img, db_session):
     
     target_face = faces[0]
     target_embedding = target_face.embedding
+    
+    # --- CHECK LIVENESS ---
+    liveness_score, is_real = check_liveness(img, target_face.bbox, kps=target_face.kps)
+    if not is_real:
+        return {"status": "error", "message": f"Wajah palsu terdeteksi! (Spoof Score: {100 - (liveness_score*100):.1f}%)"}
     
     # Get all faces in the database that are for login (marked by name)
     all_faces = db_session.query(db_models.Face).filter(db_models.Face.name == 'Face Login Profile').all()

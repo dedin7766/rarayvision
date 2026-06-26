@@ -21,6 +21,16 @@ const isSavingName = ref(false)
 const nameSuccess = ref('')
 const nameError = ref('')
 
+// Password
+const isEditingPassword = ref(false)
+const currentPasswordValue = ref('')
+const newPasswordValue = ref('')
+const confirmPasswordValue = ref('')
+const isSavingPassword = ref(false)
+const passwordSuccess = ref('')
+const passwordError = ref('')
+const hasPassword = ref(true)
+
 let mediaPipeFaceMesh = null
 const mediaPipeLoading = ref(false)
 const hasMediaPipeFace = ref(false)
@@ -37,6 +47,7 @@ const fetchProfile = async () => {
     if (res.ok && data.status === 'success') {
       userName.value = data.user.name || ''
       userEmail.value = data.user.email || ''
+      hasPassword.value = data.user.has_password
     }
   } catch (e) {
     console.error('Failed to fetch profile', e)
@@ -82,6 +93,58 @@ const saveName = async () => {
     nameError.value = `Error: ${e.message}`
   } finally {
     isSavingName.value = false
+  }
+}
+
+const startEditPassword = () => {
+  currentPasswordValue.value = ''
+  newPasswordValue.value = ''
+  confirmPasswordValue.value = ''
+  isEditingPassword.value = true
+  passwordSuccess.value = ''
+  passwordError.value = ''
+}
+
+const cancelEditPassword = () => {
+  isEditingPassword.value = false
+  passwordError.value = ''
+}
+
+const savePassword = async () => {
+  if (newPasswordValue.value !== confirmPasswordValue.value) {
+    passwordError.value = 'New passwords do not match.'
+    return
+  }
+  if (newPasswordValue.value.length < 6) {
+    passwordError.value = 'Password must be at least 6 characters.'
+    return
+  }
+  
+  isSavingPassword.value = true
+  passwordError.value = ''
+  passwordSuccess.value = ''
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/update-password`, {
+      method: 'PUT',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        current_password: hasPassword.value ? currentPasswordValue.value : null, 
+        new_password: newPasswordValue.value 
+      })
+    })
+    const data = await res.json()
+    if (res.ok && data.status === 'success') {
+      hasPassword.value = true
+      isEditingPassword.value = false
+      passwordSuccess.value = 'Password updated successfully!'
+      setTimeout(() => { passwordSuccess.value = '' }, 3000)
+    } else {
+      passwordError.value = data.detail || 'Failed to update password.'
+    }
+  } catch (e) {
+    passwordError.value = `Error: ${e.message}`
+  } finally {
+    isSavingPassword.value = false
   }
 }
 
@@ -325,6 +388,51 @@ onUnmounted(() => {
       <div v-if="nameSuccess" class="inline-success">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         {{ nameSuccess }}
+      </div>
+      
+      <div class="profile-field" style="margin-top: 24px;">
+        <label class="field-label">Password</label>
+        <div v-if="!isEditingPassword" class="field-row">
+          <p class="field-value">{{ hasPassword ? '••••••••' : 'No password set (Google Login)' }}</p>
+          <button class="edit-btn" @click="startEditPassword">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            {{ hasPassword ? 'Change' : 'Set Password' }}
+          </button>
+        </div>
+        <div v-else class="edit-name-form">
+          <input
+            v-if="hasPassword"
+            v-model="currentPasswordValue"
+            type="password"
+            placeholder="Current Password"
+            class="name-input"
+          />
+          <input
+            v-model="newPasswordValue"
+            type="password"
+            placeholder="New Password"
+            class="name-input"
+          />
+          <input
+            v-model="confirmPasswordValue"
+            type="password"
+            placeholder="Confirm New Password"
+            class="name-input"
+            @keyup.enter="savePassword"
+          />
+          <div class="edit-name-actions" style="margin-top: 4px;">
+            <button class="primary-btn save-name-btn" @click="savePassword" :disabled="isSavingPassword">
+              {{ isSavingPassword ? 'Saving...' : 'Save' }}
+            </button>
+            <button class="cancel-name-btn" @click="cancelEditPassword">Cancel</button>
+          </div>
+        </div>
+        <p v-if="passwordError" class="inline-error">{{ passwordError }}</p>
+      </div>
+
+      <div v-if="passwordSuccess" class="inline-success">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        {{ passwordSuccess }}
       </div>
     </div>
     
