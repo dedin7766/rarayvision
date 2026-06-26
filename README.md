@@ -127,10 +127,17 @@ cd rarayvision
 Create a `.env` file in the project root:
 
 ```env
+# Database (Default uses local SQLite file, no MySQL needed!)
+
+# DB_USER=
+# DB_PASS=
+# DB_HOST=localhost
+# DB_NAME=
+
 DATABASE_URL=sqlite:///./rarayvision.db
 SECRET_KEY=your-secret-key-here
 ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=1440
+ACCESS_TOKEN_EXPIRE_MINUTES=10080
 ```
 
 ### 3. Create the Dockerfile
@@ -263,13 +270,26 @@ FLUSH PRIVILEGES;
 
 ### 4. Configure environment variables
 
-Create `/etc/rarayvision.env` or set environment variables in your shell / PM2 config:
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Edit the `.env` file and configure the values (use your MySQL credentials):
 
 ```env
+# Database (Default uses local SQLite file, no MySQL needed!)
+
+# DB_USER=
+# DB_PASS=
+# DB_HOST=localhost
+# DB_NAME=
+
 DATABASE_URL=sqlite:///./rarayvision.db
 SECRET_KEY=your-secret-key-here
 ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=1440
+ACCESS_TOKEN_EXPIRE_MINUTES=10080
 ```
 
 ### 5. Place ONNX model files
@@ -386,10 +406,17 @@ cd rarayvision
 Create a `.env` file in the project root. The default configuration uses SQLite, so you don't need to install MySQL!
 
 ```env
+# Database (Default uses local SQLite file, no MySQL needed!)
+
+# DB_USER=
+# DB_PASS=
+# DB_HOST=localhost
+# DB_NAME=
+
 DATABASE_URL=sqlite:///./rarayvision.db
 SECRET_KEY=change-me-to-a-random-secret-key
 ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=1440
+ACCESS_TOKEN_EXPIRE_MINUTES=10080
 ```
 
 ### 3. Start the Backend
@@ -414,8 +441,6 @@ npm run dev
 ```
 
 The web interface will be available at `http://localhost:5173`.
-
-*(Note: If you are running the backend on a different port, e.g., 5001, you must create a `.env` file inside the `frontend` directory with `VITE_API_BASE_URL=http://127.0.0.1:5001`)*
 
 ---
 
