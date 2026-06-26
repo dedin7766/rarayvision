@@ -21,6 +21,15 @@ onMounted(async () => {
     <main class="content">
       <RouterView />
     </main>
-    <AppFooter v-if="$route.path !== '/login'" />
+    <AppFooter v-if="['/', '/dashboard'].includes($route.path)" />
+    
+    <RouterLink 
+      v-if="$route.path !== '/login' && $route.path !== '/chat'" 
+      to="/chat" 
+      class="ai-fab"
+      title="Ask AI Assistant"
+    >
+      <div class="ai-fab-icon">🤖</div>
+    </RouterLink>
   </div>
 </template>
