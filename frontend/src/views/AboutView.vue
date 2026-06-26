@@ -47,11 +47,11 @@ const submitFeedback = async () => {
 </script>
 
 <template>
-  <div class="about-page" style="padding: 4rem 1.5rem; max-width: 900px; margin: 0 auto; color: #0f172a;">
+  <div class="about-page">
     <div style="text-align: center; margin-bottom: 4rem;">
       <p style="text-transform: uppercase; letter-spacing: 2px; color: #6366f1; font-weight: 700; margin-bottom: 0.5rem; font-size: 0.9rem;">Introduce</p>
-      <h1 style="font-size: 3.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.02em;">Raray Vision API</h1>
-      <p style="font-size: 1.25rem; color: #475569; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+      <h1 class="hero-title">Raray Vision API</h1>
+      <p class="hero-desc">
         Raray Vision takes its name from the Sundanese word <strong>Raray</strong>, meaning face. The project is dedicated to advancing face recognition technology through open, scalable, and intelligent computer vision.
       </p>
     </div>
@@ -90,7 +90,7 @@ const submitFeedback = async () => {
     <!-- Core Tech Stack -->
     <div style="margin-bottom: 4rem;">
       <div style="text-align: center; margin-bottom: 3rem;">
-        <h2 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em;">Core Technology Stack</h2>
+        <h2 class="section-title">Core Technology Stack</h2>
         <p style="font-size: 1.1rem; color: #475569; max-width: 700px; margin: 1rem auto 0; line-height: 1.6;">
           Raray Vision is built on a modern, high-performance technology stack optimized for real-time face recognition, scalable API services, and production deployment.
         </p>
@@ -163,6 +163,8 @@ const submitFeedback = async () => {
             Authentication & Security
           </h3>
           <ul style="list-style: none; padding: 0; margin: 0; color: #475569; display: flex; flex-direction: column; gap: 0.75rem;">
+            <li><strong style="color: #0f172a;">AES-256 Encryption</strong> — Face embeddings are strictly secured in the database using industry-standard cryptography.</li>
+            <li><strong style="color: #0f172a;">In-Memory Processing</strong> — Original images are processed in-memory and immediately discarded unless explicitly enabled, supporting UU PDP and GDPR compliance.</li>
             <li><strong style="color: #0f172a;">Passlib (bcrypt)</strong> — Password hashing and credential protection.</li>
             <li><strong style="color: #0f172a;">PyJWT</strong> — JWT-based authentication and authorization.</li>
             <li><strong style="color: #0f172a;">python-multipart</strong> — Multipart form and file processing.</li>
@@ -207,7 +209,7 @@ const submitFeedback = async () => {
     <div style="margin-bottom: 4rem;">
       <div style="text-align: center; margin-bottom: 3rem;">
         <p style="text-transform: uppercase; letter-spacing: 2px; color: #6366f1; font-weight: 700; margin-bottom: 0.5rem; font-size: 0.9rem;">We Value Your Input</p>
-        <h2 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em;">Send Feedback</h2>
+        <h2 class="section-title">Send Feedback</h2>
         <p style="font-size: 1.1rem; color: #475569; max-width: 600px; margin: 1rem auto 0; line-height: 1.6;">
           Have a suggestion, found a bug, or want to request a feature? Let us know below!
         </p>
@@ -254,8 +256,8 @@ const submitFeedback = async () => {
     </div>
 
     <!-- Footer Banner -->
-    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 24px; padding: 4rem 2rem; text-align: center; color: white;">
-      <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">Open by Design, Built for Innovation</h2>
+    <div class="footer-banner" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 24px; text-align: center; color: white;">
+      <h2 class="banner-title">Open by Design, Built for Innovation</h2>
       <p style="font-size: 1.15rem; color: #cbd5e1; max-width: 650px; margin: 0 auto 2rem auto; line-height: 1.6;">
         Designed to accelerate AI development, Raray Vision brings enterprise-grade facial recognition to the community. Build, scale, and integrate advanced computer vision into your applications without commercial barriers or restrictive limits.
       </p>
@@ -272,6 +274,60 @@ const submitFeedback = async () => {
   </div>
 </template>
 
+
 <style scoped>
-/* No extra styles needed, using inline css for isolated rapid styling */
+.about-page {
+  padding: 4rem 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+  color: #0f172a;
+}
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+.hero-desc {
+  font-size: 1.25rem;
+  color: #475569;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.banner-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+.footer-banner {
+  padding: 4rem 2rem;
+}
+
+@media (max-width: 768px) {
+  .about-page {
+    padding: 2rem 1rem;
+  }
+  .hero-title {
+    font-size: 2.2rem;
+  }
+  .hero-desc {
+    font-size: 1rem;
+  }
+  .section-title {
+    font-size: 1.8rem;
+  }
+  .banner-title {
+    font-size: 1.8rem;
+  }
+  .footer-banner {
+    padding: 2.5rem 1.5rem;
+  }
+}
 </style>
