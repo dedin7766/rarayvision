@@ -261,25 +261,26 @@ def submit_feedback(feedback: FeedbackRequest):
     print(f"Feedback received from {feedback.name} ({feedback.email}): {feedback.message}")
     return {"status": "success", "message": "Feedback received"}
 
+from sqlalchemy.orm import Session
+from fastapi import Depends
+from backend.database import get_db, Face, ApiKey, User
+from backend.app.core.deps import get_current_user
+from sqlalchemy.sql import func
+
 @fastapi_app.get("/health", tags=["System"])
-def health_check():
+def health_check(current_user: User = Depends(get_current_user)):
     return {"status": "ok", "message": "Raray Vision API is online"}
 
 @fastapi_app.get("/version", tags=["System"])
-def get_version():
+def get_version(current_user: User = Depends(get_current_user)):
     return {
         "version": "1.0.0",
         "model": "buffalo_l",
         "engine": "InsightFace"
     }
 
-from sqlalchemy.orm import Session
-from fastapi import Depends
-from backend.database import get_db, Face, ApiKey
-from sqlalchemy.sql import func
-
 @fastapi_app.get("/stats", tags=["System"])
-def get_stats(db: Session = Depends(get_db)):
+def get_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     registered_faces = db.query(func.count(Face.internal_id)).scalar() or 0
     total_requests = db.query(func.sum(ApiKey.usage_count)).scalar() or 0
     
