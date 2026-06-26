@@ -1785,3 +1785,11 @@ button {
   height: 48px;
   margin-bottom: 8px;
 }
+
+@media (max-width: 768px) {
+  .tester-header select {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 0.5rem;
+  }
+}
