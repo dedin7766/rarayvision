@@ -447,9 +447,27 @@ This project is released under the MIT License. See [LICENSE](LICENSE) for detai
 
 ---
 
+## Support
+
+If you find this project useful and want to support its development, you can buy me a coffee (or cendol ☕):
+
+[![Trakteer](https://cdn.trakteer.id/images/embed/trbtn-red-1.png)](https://trakteer.id/dedin_toyibah)
+
+---
+
+## Contact
+
+For business inquiries, collaboration, or custom development:
+
+- **WhatsApp**: [Chat with Dedin](https://wa.me/6282299331066)
+- **Email**: dedintoyibah70@gmail.com
+
+---
+
 ## Links
 
 - Live Demo: https://rarayvision.dfs.co.id
 - API Base URL: https://apirv.dfs.co.id/api/v1
 - Swagger UI: https://apirv.dfs.co.id/docs
-- ReDoc: https://apirv.dfs.co.id/redoc 
+- ReDoc: https://apirv.dfs.co.id/redoc
+- Trakteer: https://trakteer.id/dedin_toyibah 
