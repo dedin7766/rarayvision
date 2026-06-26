@@ -46,6 +46,8 @@ Supported detections:
 async def check_liveness_endpoint(file: UploadFile = File(...)):
     try:
         contents = await file.read()
+        if len(contents) > 5 * 1024 * 1024:
+            return {"status": "error", "message": "File size exceeds the 5MB limit"}
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img is None: return {"status": "error", "message": "Invalid or corrupted image"}
@@ -74,6 +76,8 @@ async def compare_face_endpoint(
 ):
     try:
         contents = await file.read()
+        if len(contents) > 5 * 1024 * 1024:
+            return {"status": "error", "message": "File size exceeds the 5MB limit"}
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img is None: return {"status": "error", "message": "Invalid or corrupted image"}
@@ -102,6 +106,8 @@ Extract:
 async def extract_face_endpoint(file: UploadFile = File(...)):
     try:
         contents = await file.read()
+        if len(contents) > 5 * 1024 * 1024:
+            return {"status": "error", "message": "File size exceeds the 5MB limit"}
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img is None: return {"status": "error", "message": "Invalid or corrupted image"}
@@ -133,6 +139,8 @@ async def register_face_endpoint(
         return {"status": "error", "message": f"User ID '{user_id}' is already registered."}
     try:
         contents = await file.read()
+        if len(contents) > 5 * 1024 * 1024:
+            return {"status": "error", "message": "File size exceeds the 5MB limit"}
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img is None:
@@ -161,7 +169,7 @@ async def register_face_endpoint(
             "name": final_name,
             "embedding": embedding
         })
-        save_face_to_db(db_session, current_user.id, user_id, final_name, embedding, image_url)
+        save_face_to_db(db_session, current_user.id, user_id, final_name, embedding, image_url if getattr(current_user, "store_images", False) else None)
 
         return {
             "status": "success",
@@ -194,6 +202,8 @@ async def update_face_endpoint(
     known_faces_db = get_tenant_faces(db_session, current_user.id)
     try:
         contents = await file.read()
+        if len(contents) > 5 * 1024 * 1024:
+            return {"status": "error", "message": "File size exceeds the 5MB limit"}
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img is None:
@@ -309,6 +319,8 @@ async def register_face_noliveness_endpoint(
         return {"status": "error", "message": f"User ID '{user_id}' is already registered."}
     try:
         contents = await file.read()
+        if len(contents) > 5 * 1024 * 1024:
+            return {"status": "error", "message": "File size exceeds the 5MB limit"}
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img is None:
@@ -337,7 +349,7 @@ async def register_face_noliveness_endpoint(
             "name": final_name,
             "embedding": embedding
         })
-        save_face_to_db(db_session, current_user.id, user_id, final_name, embedding, image_url)
+        save_face_to_db(db_session, current_user.id, user_id, final_name, embedding, image_url if getattr(current_user, "store_images", False) else None)
 
         return {
             "status": "success",
@@ -372,6 +384,8 @@ async def register_face_live_endpoint(
         return {"status": "error", "message": f"User ID '{user_id}' is already registered."}
     try:
         contents = await file.read()
+        if len(contents) > 5 * 1024 * 1024:
+            return {"status": "error", "message": "File size exceeds the 5MB limit"}
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img is None:
@@ -396,7 +410,7 @@ async def register_face_live_endpoint(
         
         # (ID uniqueness check already performed above)
         known_faces_db.append({"id": user_id, "name": final_name, "embedding": embedding})
-        save_face_to_db(db_session, current_user.id, user_id, final_name, embedding, image_url)
+        save_face_to_db(db_session, current_user.id, user_id, final_name, embedding, image_url if getattr(current_user, "store_images", False) else None)
 
         return {
             "status": "success",
@@ -431,6 +445,8 @@ Real-time face recognition supporting multiple modes:
 async def recognize_live_endpoint(file: UploadFile = File(...), mode: str = Form("identify"), current_user: db_models.User = Depends(get_current_user), db_session: Session = Depends(db.get_db)):
     try:
         contents = await file.read()
+        if len(contents) > 5 * 1024 * 1024:
+            return {"status": "error", "message": "File size exceeds the 5MB limit"}
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img is None:
@@ -454,6 +470,8 @@ powered by Buffalo-L (InsightFace).
 async def recognize_endpoint(file: UploadFile = File(...), current_user: db_models.User = Depends(get_current_user), db_session: Session = Depends(db.get_db)):
     try:
         contents = await file.read()
+        if len(contents) > 5 * 1024 * 1024:
+            return {"status": "error", "message": "File size exceeds the 5MB limit"}
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img is None: return {"status": "error", "message": "Invalid or corrupted image"}
@@ -477,6 +495,8 @@ This endpoint returns an array of recognized faces along with their bounding box
 async def recognize_multi_endpoint(file: UploadFile = File(...), current_user: db_models.User = Depends(get_current_user), db_session: Session = Depends(db.get_db)):
     try:
         contents = await file.read()
+        if len(contents) > 5 * 1024 * 1024:
+            return {"status": "error", "message": "File size exceeds the 5MB limit"}
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img is None: return {"status": "error", "message": "Invalid or corrupted image"}
@@ -500,6 +520,8 @@ Perform 1:N face identification for **multiple faces** present in a live streami
 async def recognize_live_multi_endpoint(file: UploadFile = File(...), current_user: db_models.User = Depends(get_current_user), db_session: Session = Depends(db.get_db)):
     try:
         contents = await file.read()
+        if len(contents) > 5 * 1024 * 1024:
+            return {"status": "error", "message": "File size exceeds the 5MB limit"}
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img is None:
@@ -523,6 +545,8 @@ async def register_login_face_endpoint(
     """Register or update the user's login face. face_id = user's actual ID."""
     try:
         contents = await file.read()
+        if len(contents) > 5 * 1024 * 1024:
+            return {"status": "error", "message": "File size exceeds the 5MB limit"}
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img is None:
@@ -547,7 +571,7 @@ async def register_login_face_endpoint(
         image_url = f"{base_url}/api/v1/uploads/faces/{filename}"
         
         # Upsert: save_face_to_db already handles update if face_id exists
-        save_face_to_db(db_session, current_user.id, face_id, face_name, embedding, image_url)
+        save_face_to_db(db_session, current_user.id, face_id, face_name, embedding, image_url if getattr(current_user, "store_images", False) else None)
 
         return {
             "status": "success",
