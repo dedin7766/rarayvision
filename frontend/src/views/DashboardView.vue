@@ -20,7 +20,7 @@ const copyKey = (key) => {
 }
 
 const copyUrl = () => {
-  navigator.clipboard.writeText('https://yourdomain/api/v1')
+  navigator.clipboard.writeText('https://apirv.dfs.co.id/api/v1')
   showToast('API Endpoint copied to clipboard!')
 }
 
@@ -161,12 +161,12 @@ onMounted(() => {
         <p>Use this base URL to integrate our Face Recognition API into your own application.</p>
         <div 
           @click="copyUrl"
-          style="background: #f1f5f9; padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 1px solid #e2e8f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center;"
+          style="background: #f1f5f9; padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 1px solid #e2e8f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;"
           title="Click to copy API Endpoint"
         >
           <div>
             <p style="margin:0; font-size: 0.85rem; color: #64748b;">Base API Endpoint</p>
-            <p style="margin: 0.5rem 0 0 0; font-family: monospace; font-size: 1.1rem; color: #0f172a; font-weight: 600;">https://yourdomain/api/v1</p>
+            <p style="margin: 0.5rem 0 0 0; font-family: monospace; font-size: 1rem; color: #0f172a; font-weight: 600; word-break: break-all;">https://apirv.dfs.co.id/api/v1</p>
           </div>
           <button style="background: #e2e8f0; border: none; padding: 6px 12px; border-radius: 6px; color: #0f172a; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Copy</button>
         </div>
