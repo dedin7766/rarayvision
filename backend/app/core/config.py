@@ -5,10 +5,13 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")), ".env"))
 
 # Database Configuration
-DB_USER = os.getenv("DB_USER", "raray")
-DB_PASS = os.getenv("DB_PASS", "yourpassword")
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_NAME = os.getenv("DB_NAME", "rarayvision")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    DB_USER = os.getenv("DB_USER", "raray")
+    DB_PASS = os.getenv("DB_PASS", "yourpassword")
+    DB_HOST = os.getenv("DB_HOST", "localhost")
+    DB_NAME = os.getenv("DB_NAME", "rarayvision")
+    DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
 
 # JWT Configuration
 SECRET_KEY = os.getenv("SECRET_KEY", "change-me-to-a-random-secret-key")

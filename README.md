@@ -127,7 +127,7 @@ cd rarayvision
 Create a `.env` file in the project root:
 
 ```env
-DATABASE_URL=mysql+pymysql://raray:yourpassword@db:3306/rarayvision
+DATABASE_URL=sqlite:///./rarayvision.db
 SECRET_KEY=your-secret-key-here
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=1440
@@ -266,7 +266,7 @@ FLUSH PRIVILEGES;
 Create `/etc/rarayvision.env` or set environment variables in your shell / PM2 config:
 
 ```env
-DATABASE_URL=mysql+pymysql://raray:yourpassword@localhost:3306/rarayvision
+DATABASE_URL=sqlite:///./rarayvision.db
 SECRET_KEY=your-secret-key-here
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=1440
