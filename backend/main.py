@@ -261,9 +261,33 @@ def submit_feedback(feedback: FeedbackRequest):
     print(f"Feedback received from {feedback.name} ({feedback.email}): {feedback.message}")
     return {"status": "success", "message": "Feedback received"}
 
-@fastapi_app.get("/health", include_in_schema=False)
+@fastapi_app.get("/health", tags=["System"])
 def health_check():
     return {"status": "ok", "message": "Raray Vision API is online"}
+
+@fastapi_app.get("/version", tags=["System"])
+def get_version():
+    return {
+        "version": "1.0.0",
+        "model": "buffalo_l",
+        "engine": "InsightFace"
+    }
+
+from sqlalchemy.orm import Session
+from fastapi import Depends
+from backend.database import get_db, Face, ApiKey
+from sqlalchemy.sql import func
+
+@fastapi_app.get("/stats", tags=["System"])
+def get_stats(db: Session = Depends(get_db)):
+    registered_faces = db.query(func.count(Face.internal_id)).scalar() or 0
+    total_requests = db.query(func.sum(ApiKey.usage_count)).scalar() or 0
+    
+    return {
+        "registered_faces": registered_faces,
+        "total_requests": int(total_requests),
+        "today_requests": int(total_requests) # Placeholder for today
+    }
 
 # Setup Socket.IO App
 app = socketio.ASGIApp(sio, fastapi_app)
