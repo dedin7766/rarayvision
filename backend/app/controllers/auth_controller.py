@@ -1,8 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from sqlalchemy.orm import Session
-from backend.app.schemas.schemas import RegisterRequest, LoginRequest, UpdateProfileRequest, GoogleLoginRequest, UpdatePasswordRequest
-from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests
+from backend.app.schemas.schemas import RegisterRequest, LoginRequest, UpdateProfileRequest, UpdatePasswordRequest
 from backend.app.core.security import get_password_hash, verify_password, create_access_token
 from backend.app.core.deps import get_current_user
 from backend.app.database import database as db
