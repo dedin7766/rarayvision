@@ -89,7 +89,7 @@ async def register_face_endpoint(
             "name": final_name,
             "embedding": embedding
         })
-        save_face_to_db(db_session, current_user.id, user_id, final_name, embedding, image_url)
+        save_face_to_db(db_session, current_user.id, user_id, final_name, embedding, image_url if getattr(current_user, "store_images", False) else None)
 
         return {
             "status": "success",
@@ -245,7 +245,7 @@ async def register_face_noliveness_endpoint(
             "name": final_name,
             "embedding": embedding
         })
-        save_face_to_db(db_session, current_user.id, user_id, final_name, embedding, image_url)
+        save_face_to_db(db_session, current_user.id, user_id, final_name, embedding, image_url if getattr(current_user, "store_images", False) else None)
 
         return {
             "status": "success",
@@ -296,7 +296,7 @@ async def register_face_live_endpoint(
         
         # (ID uniqueness check already performed above)
         known_faces_db.append({"id": user_id, "name": final_name, "embedding": embedding})
-        save_face_to_db(db_session, current_user.id, user_id, final_name, embedding, image_url)
+        save_face_to_db(db_session, current_user.id, user_id, final_name, embedding, image_url if getattr(current_user, "store_images", False) else None)
 
         return {
             "status": "success",
@@ -404,7 +404,7 @@ class FeedbackRequest(BaseModel):
     email: str
     message: str
 
-@fastapi_app.post("/api/v1/feedback")
+@fastapi_app.post("/api/v1/feedback", include_in_schema=False)
 def submit_feedback(req: FeedbackRequest):
     import smtplib
     from email.mime.text import MIMEText

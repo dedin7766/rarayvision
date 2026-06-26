@@ -15,21 +15,6 @@ from backend.app.database.database import Base, engine
 # Create DB Tables
 Base.metadata.create_all(bind=engine)
 
-# Seed default user if DB is empty
-from backend.app.database.database import SessionLocal
-from backend.app.core.security import get_password_hash
-from backend.app.database import models as db_models
-
-db_session = SessionLocal()
-try:
-    if not db_session.query(db_models.User).first():
-        hashed = get_password_hash("askingme")
-        admin = db_models.User(email="admin@rarayvision.dfs.co.id", name="Admin", password_hash=hashed)
-        db_session.add(admin)
-        db_session.commit()
-finally:
-    db_session.close()
-
 fastapi_app = FastAPI(
     title="Raray Vision API",
     description="""
@@ -271,7 +256,7 @@ class FeedbackRequest(BaseModel):
     email: str
     message: str
 
-@fastapi_app.post("/api/v1/feedback", tags=["General"])
+@fastapi_app.post("/api/v1/feedback", tags=["General"], include_in_schema=False)
 def submit_feedback(feedback: FeedbackRequest):
     print(f"Feedback received from {feedback.name} ({feedback.email}): {feedback.message}")
     return {"status": "success", "message": "Feedback received"}
