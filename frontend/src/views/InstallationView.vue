@@ -39,6 +39,7 @@ const copyCode = (event) => {
       <div class="method-pills">
         <a href="#docker" class="pill active">Docker</a>
         <a href="#baremetal" class="pill">Bare Metal</a>
+        <a href="#localdev" class="pill">Local Dev</a>
         <a href="#nginx" class="pill">Nginx</a>
         <a href="#auth" class="pill">Authentication</a>
       </div>
@@ -313,6 +314,51 @@ npm run build</pre>
           </div>
         </div>
 
+      </div>
+    </div>
+
+    <!-- Local Development Section -->
+    <div id="localdev" class="section">
+      <div class="section-label">Option 3</div>
+      <h2 class="section-title">Local Development</h2>
+      <p class="section-desc">Run the project locally on your computer without Docker or Nginx.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Start the Backend</h3>
+            <p>Create a <code>.env</code> file with <code>DATABASE_URL=sqlite:///./rarayvision.db</code>, then run:</p>
+            <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
+              <pre>python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn backend.main:app --host 0.0.0.0 --port 5000 --reload</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Start the Frontend</h3>
+            <div class="code-block">
+              <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+              </button>
+              <pre>cd frontend
+npm install
+npm run dev</pre>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

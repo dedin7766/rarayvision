@@ -370,6 +370,53 @@ certbot --nginx -d yourdomain.com
 
 ---
 
+## Option 3 — Local Development (Laptop / PC)
+
+If you just want to run the project locally on your computer (Windows/Mac/Linux) without Docker or Nginx, follow these steps:
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/dedin7766/rarayvision.git
+cd rarayvision
+```
+
+### 2. Configure environment variables
+
+Create a `.env` file in the project root. The default configuration uses SQLite, so you don't need to install MySQL!
+
+```env
+DATABASE_URL=sqlite:///./rarayvision.db
+SECRET_KEY=change-me-to-a-random-secret-key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=1440
+```
+
+### 3. Start the Backend
+
+Open a terminal in the project root:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate  # Or `venv\Scripts\activate` on Windows
+pip install -r requirements.txt
+uvicorn backend.main:app --host 0.0.0.0 --port 5000 --reload
+```
+
+### 4. Start the Frontend
+
+Open a **new** terminal window:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The web interface will be available at `http://localhost:5173`.
+
+---
+
 ## Changing API Endpoint URL & Custom Domain
 
 By default, the frontend communicates with `http://127.0.0.1:5000` (for localhost) or `https://apirv.dfs.co.id` (for production). 
