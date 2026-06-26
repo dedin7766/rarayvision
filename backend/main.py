@@ -32,6 +32,7 @@ Powered by:
 \u2022 NumPy
 """,
     version="1.0.0",
+    openapi_version="3.0.2",
     contact={"name": "Raray Vision Team", "url": "https://rarayvision.dfs.co.id"},
     servers=[{"url": "https://apirv.dfs.co.id", "description": "Production Server"}],
     docs_url=None,
@@ -69,6 +70,7 @@ async def filter_openapi_schema(request: Request, call_next):
             paths = schema.get("paths", {})
             for path in _HIDDEN_PATHS:
                 paths.pop(path, None)
+            
             # Remove orphaned tag groups
             used_tags = {
                 tag
@@ -79,6 +81,16 @@ async def filter_openapi_schema(request: Request, call_next):
             }
             if "tags" in schema:
                 schema["tags"] = [t for t in schema["tags"] if t.get("name") in used_tags]
+
+            # FIX: Swagger UI 5.x needs 'format': 'binary' to render file upload buttons
+            # even though OpenAPI 3.1.0 uses contentMediaType. We inject it here.
+            schemas = schema.get("components", {}).get("schemas", {})
+            for schema_name, schema_obj in schemas.items():
+                if "properties" in schema_obj:
+                    for prop_name, prop_data in schema_obj["properties"].items():
+                        if prop_data.get("contentMediaType") == "application/octet-stream":
+                            prop_data["format"] = "binary"
+
             return JSONResponse(content=schema, status_code=response.status_code)
         except Exception:
             return JSONResponse(content=json.loads(body), status_code=response.status_code)
