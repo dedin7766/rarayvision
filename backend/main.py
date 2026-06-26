@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
+from starlette.exceptions import HTTPException as StarletteHTTPException
 import socketio
 
 from backend.app.controllers import auth_controller, api_key_controller, face_controller
@@ -215,10 +216,38 @@ async def custom_redoc():
 </html>"""
     return HTMLResponse(html)
 
-# Basic Health Check
-@fastapi_app.get("/", include_in_schema=False)
-def home():
-    return {"message": "Raray Vision API MVC is running"}
+def get_404_html():
+    return """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Not Found | Raray Vision</title>
+    <style>
+        body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; }
+        .container { max-width: 500px; padding: 40px; background: #1e293b; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5); }
+        h1 { font-size: 80px; margin: 0; color: #6366f1; letter-spacing: -2px; }
+        h2 { font-size: 24px; margin: 10px 0 20px; font-weight: 600; color: #e2e8f0; }
+        p { color: #94a3b8; font-size: 15px; line-height: 1.6; margin-bottom: 30px; }
+        a { display: inline-block; padding: 10px 24px; background: #3b82f6; color: #fff; text-decoration: none; font-weight: 500; border-radius: 8px; transition: background 0.2s; }
+        a:hover { background: #2563eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>404</h1>
+        <h2>Endpoint Not Found</h2>
+        <p>The API endpoint or page you are looking for does not exist.<br>Please refer to the official API documentation.</p>
+        <a href="/docs">View API Documentation</a>
+    </div>
+</body>
+</html>"""
+
+@fastapi_app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == 404:
+        return HTMLResponse(content=get_404_html(), status_code=404)
+    return JSONResponse(content={"detail": exc.detail}, status_code=exc.status_code)
 
 # Setup Socket.IO App
 app = socketio.ASGIApp(sio, fastapi_app)
