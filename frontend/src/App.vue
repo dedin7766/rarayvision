@@ -4,6 +4,7 @@ import { store } from './store'
 import { authService } from './services/authService'
 import { apiKeyService } from './services/apiKeyService'
 import AppHeader from './components/AppHeader.vue'
+import AppFooter from './components/AppFooter.vue'
 
 onMounted(async () => {
   authService.checkHealth()
@@ -20,5 +21,6 @@ onMounted(async () => {
     <main class="content">
       <RouterView />
     </main>
+    <AppFooter v-if="$route.path !== '/login'" />
   </div>
 </template>
