@@ -22,10 +22,19 @@ import requests
 
 
 
+# --- CHECK CUDA SUPPORT ---
+import onnxruntime as ort_check
+available_providers = ['CPUExecutionProvider']
+if 'CUDAExecutionProvider' in ort_check.get_available_providers():
+    available_providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
+    print("🚀 CUDA GPU Detected! Running ML models on GPU.")
+else:
+    print("💻 No GPU detected. Running ML models on CPU.")
+
 # --- 1. LOAD MODEL DETEKSI WAJAH (InsightFace) ---
 print("⏳ Loading InsightFace Models...")
 try:
-    face_app = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
+    face_app = FaceAnalysis(name='buffalo_l', providers=available_providers)
     face_app.prepare(ctx_id=0, det_size=(640, 640))
     print("✅ InsightFace loaded successfully!")
 except Exception as e:
@@ -38,7 +47,7 @@ emotion_session = None
 print(f"⏳ Loading Anti-Spoofing Model ({ANTI_SPOOF_MODEL_PATH})...")
 if os.path.exists(ANTI_SPOOF_MODEL_PATH):
     try:
-        spoof_session = ort.InferenceSession(ANTI_SPOOF_MODEL_PATH, providers=['CPUExecutionProvider'])
+        spoof_session = ort.InferenceSession(ANTI_SPOOF_MODEL_PATH, providers=available_providers)
         print(f"✅ Anti-Spoofing ONNX loaded successfully!")
     except Exception as e:
         print(f"❌ Error saat load ONNX: {e}")
@@ -48,7 +57,7 @@ else:
 print(f"⏳ Loading Emotion Model ({EMOTION_MODEL_PATH})...")
 if os.path.exists(EMOTION_MODEL_PATH):
     try:
-        emotion_session = ort.InferenceSession(EMOTION_MODEL_PATH, providers=['CPUExecutionProvider'])
+        emotion_session = ort.InferenceSession(EMOTION_MODEL_PATH, providers=available_providers)
         print("✅ Emotion ONNX loaded successfully!")
     except Exception as e:
         print(f"❌ Error saat load Emotion Model: {e}")

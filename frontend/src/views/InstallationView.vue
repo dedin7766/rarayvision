@@ -218,7 +218,25 @@ cd rarayvision</pre>
 source venv/bin/activate
 pip install -r requirements.txt</pre>
             </div>
+
           </div>
+            <div style="margin-top: 24px; padding: 16px; background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <h4 style="margin-top: 0; margin-bottom: 8px; color: #0f172a; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                GPU Acceleration (Optional)
+              </h4>
+              <p style="margin-bottom: 12px; font-size: 0.95rem; color: #475569; line-height: 1.5;">
+                Raray Vision automatically detects NVIDIA GPUs. If you have a GPU and CUDA Toolkit installed, replace the standard runtime to enable it:
+              </p>
+              <div class="code-block" style="margin: 0;">
+                <button class="copy-btn" @click="copyCode($event)" title="Copy code">
+                  <span class="icon">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  </span>
+                </button>
+                <pre>pip uninstall -y onnxruntime
+pip install onnxruntime-gpu</pre>
+              </div>
+            </div>
         </div>
 
         <div class="step">
