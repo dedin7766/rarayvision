@@ -451,7 +451,7 @@ This project is released under the MIT License. See [LICENSE](LICENSE) for detai
 
 If you find this project useful and want to support its development, you can buy me a coffee (or cendol ☕):
 
-[![Trakteer](https://cdn.trakteer.id/images/embed/trbtn-red-1.png)](https://trakteer.id/dedin_toyibah)
+<a href="https://trakteer.id/dedin_toyibah" target="_blank"><img src="https://cdn.trakteer.id/images/embed/trbtn-red-1.png" height="36" alt="Trakteer Saya"></a>
 
 ---
 
