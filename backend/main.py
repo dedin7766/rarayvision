@@ -174,4 +174,27 @@ app = socketio.ASGIApp(sio, fastapi_app)
 # On Startup hook if needed
 @fastapi_app.on_event("startup")
 async def startup_event():
-    print("\U0001f680 FastAPI MVC Server Starting...")
+    print("🚀 FastAPI MVC Server Starting...")
+    from backend.app.database.database import SessionLocal
+    from backend.app.database.models import User
+    from backend.app.core.security import get_password_hash
+    
+    db = SessionLocal()
+    try:
+        admin_email = "admin@rarayvision.dfs.co.id"
+        admin = db.query(User).filter(User.email == admin_email).first()
+        if not admin:
+            print(f"Creating default admin user: {admin_email}")
+            admin = User(
+                email=admin_email,
+                hashed_password=get_password_hash("askingme"),
+                name="System Admin",
+                role="admin",
+                is_active=True
+            )
+            db.add(admin)
+            db.commit()
+    except Exception as e:
+        print(f"Failed to create default admin: {e}")
+    finally:
+        db.close()
