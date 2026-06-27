@@ -77,7 +77,7 @@ const ensureMediaPipe = async () => {
     minTrackingConfidence: 0.5
   });
   mediaPipeFaceMesh.onResults((results) => {
-    if (liveMode.value !== 'landmark' && liveMode.value !== 'emotion' && liveMode.value !== 'identify' && liveMode.value !== 'kyc') return
+    if (liveMode.value !== 'landmark' && liveMode.value !== 'emotion' && liveMode.value !== 'identify' && liveMode.value !== 'kyc' && liveMode.value !== 'liveness_landmark' && liveMode.value !== 'liveness_identify') return
     const canvas = liveCanvasEl.value
     if (!canvas) return
     const ctx = canvas.getContext('2d')
@@ -86,20 +86,56 @@ const ensureMediaPipe = async () => {
       ctx.save()
       ctx.translate(canvas.width, 0)
       ctx.scale(-1, 1)
+      let meshColor = '#06b6d4'
+      let eyeColor = '#22d3ee'
+      
+      if ((liveMode.value === 'liveness_landmark' || liveMode.value === 'liveness_identify') && liveResult.value && liveResult.value.data && liveResult.value.data.is_real !== undefined) {
+         if (liveResult.value.data.is_real) {
+             meshColor = '#06b6d4'
+             eyeColor = '#22d3ee'
+         } else {
+             meshColor = '#ef4444'
+             eyeColor = '#f87171'
+         }
+      }
+
       for (const landmarks of results.multiFaceLandmarks) {
-        window.drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, {color: '#06b6d4', lineWidth: 1});
-        window.drawConnectors(ctx, landmarks, window.FACEMESH_RIGHT_EYE, {color: '#22d3ee', lineWidth: 2});
-        window.drawConnectors(ctx, landmarks, window.FACEMESH_RIGHT_EYEBROW, {color: '#22d3ee', lineWidth: 2});
-        window.drawConnectors(ctx, landmarks, window.FACEMESH_LEFT_EYE, {color: '#22d3ee', lineWidth: 2});
-        window.drawConnectors(ctx, landmarks, window.FACEMESH_LEFT_EYEBROW, {color: '#22d3ee', lineWidth: 2});
-        window.drawConnectors(ctx, landmarks, window.FACEMESH_FACE_OVAL, {color: '#22d3ee', lineWidth: 2});
-        window.drawConnectors(ctx, landmarks, window.FACEMESH_LIPS, {color: '#22d3ee', lineWidth: 2});
+        window.drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, {color: meshColor, lineWidth: 1});
+        window.drawConnectors(ctx, landmarks, window.FACEMESH_RIGHT_EYE, {color: eyeColor, lineWidth: 2});
+        window.drawConnectors(ctx, landmarks, window.FACEMESH_RIGHT_EYEBROW, {color: eyeColor, lineWidth: 2});
+        window.drawConnectors(ctx, landmarks, window.FACEMESH_LEFT_EYE, {color: eyeColor, lineWidth: 2});
+        window.drawConnectors(ctx, landmarks, window.FACEMESH_LEFT_EYEBROW, {color: eyeColor, lineWidth: 2});
+        window.drawConnectors(ctx, landmarks, window.FACEMESH_FACE_OVAL, {color: eyeColor, lineWidth: 2});
+        window.drawConnectors(ctx, landmarks, window.FACEMESH_LIPS, {color: eyeColor, lineWidth: 2});
       }
       ctx.restore()
       ctx.font = 'bold 16px Inter, sans-serif'
       let badgeText = 'Google MediaPipe 468-Mesh'
       let bgColor = 'rgba(6,182,212,0.85)'
-      if (liveMode.value === 'emotion') {
+      if (liveMode.value === 'liveness_landmark' || liveMode.value === 'liveness_identify') {
+        if (liveResult.value && liveResult.value.data && liveResult.value.data.liveness_score !== undefined) {
+           if (liveResult.value.data.is_real) {
+               if (liveMode.value === 'liveness_identify') {
+                   if (liveResult.value.match) {
+                       bgColor = 'rgba(22,163,74,0.85)'
+                       badgeText = `Real | ${liveResult.value.data.name || liveResult.value.data.id} ${(liveResult.value.data.similarity * 100).toFixed(1)}%`
+                   } else {
+                       bgColor = 'rgba(217,119,6,0.85)'
+                       badgeText = `Real | Unknown Face`
+                   }
+               } else {
+                   bgColor = 'rgba(6,182,212,0.85)'
+                   badgeText = `Real ${(liveResult.value.data.liveness_score * 100).toFixed(1)}%`
+               }
+           } else {
+               bgColor = 'rgba(239,68,68,0.85)'
+               badgeText = `Spoof! ${(liveResult.value.data.liveness_score * 100).toFixed(1)}%`
+           }
+        } else {
+           bgColor = 'rgba(100,116,139,0.85)'
+           badgeText = 'Analyzing...'
+        }
+      } else if (liveMode.value === 'emotion') {
         const emoStr = (liveResult.value && liveResult.value.data && liveResult.value.data.emotion) ? liveResult.value.data.emotion : 'Unknown'
         const emoEmoji = emoStr === 'Happy' ? '😊' : emoStr === 'Sad' ? '😢' : emoStr === 'Angry' ? '😠' : emoStr === 'Surprise' ? '😲' : emoStr === 'Fear' ? '😨' : emoStr === 'Disgust' ? '🤢' : '😐'
         bgColor = 'rgba(168,85,247,0.85)'
@@ -249,7 +285,7 @@ const captureAndRecognize = async () => {
     try {
       const fd = new FormData()
       fd.append('file', blob, 'frame.jpg')
-      const reqMode = liveMode.value === 'kyc' ? 'identify' : liveMode.value
+      const reqMode = (liveMode.value === 'kyc') ? 'identify' : (liveMode.value === 'liveness_landmark' ? 'liveness' : liveMode.value)
       fd.append('mode', reqMode)
       const token = localStorage.getItem('rarayvision-token')
       const headers = {}
@@ -282,7 +318,7 @@ const startRenderLoop = () => {
   let isSending = false
   const loop = async () => {
     liveRafId.value = requestAnimationFrame(loop)
-    if (liveMode.value === 'landmark' || liveMode.value === 'emotion' || liveMode.value === 'identify' || liveMode.value === 'kyc') {
+    if (liveMode.value === 'landmark' || liveMode.value === 'emotion' || liveMode.value === 'identify' || liveMode.value === 'kyc' || liveMode.value === 'liveness_landmark' || liveMode.value === 'liveness_identify') {
       if (!window.FaceMesh && !mediaPipeLoading.value) {
         ensureMediaPipe()
       } else if (mediaPipeFaceMesh && !mediaPipeLoading.value && !isSending) {
@@ -506,6 +542,8 @@ onUnmounted(() => stopCamera())
           <option value="identify_multi">Multi-Face Identification</option>
           <option value="analyze">Demographics</option>
           <option value="liveness">Passive Liveness (Anti-Spoofing)</option>
+          <option value="liveness_landmark">Passive Liveness (with Landmark)</option>
+          <option value="liveness_identify">Passive Liveness + Recognition</option>
           <option value="emotion">Emotion Analysis</option>
           <option value="attributes">Face Attributes</option>
           <option value="kyc">Active Liveness</option>

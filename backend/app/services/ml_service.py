@@ -454,6 +454,58 @@ def process_recognize_live(img, tenant_faces, mode="identify"):
                 "is_real": bool(is_real)
             }
         }
+
+    if mode == "liveness_identify":
+        real_score, is_real = check_liveness(img, target_face.bbox, kps=target_face.kps)
+        if not is_real:
+            return {
+                "status": "success",
+                "mode": mode,
+                "data": {
+                    **base_data,
+                    "liveness_score": float(real_score),
+                    "is_real": bool(is_real),
+                    "match": False,
+                    "id": None,
+                    "name": "Spoof Detected"
+                }
+            }
+        
+        target_embedding = target_face.embedding
+        best_score = 0
+        best_match = None
+
+        for user in tenant_faces:
+            sim = compute_similarity(target_embedding, user['embedding'])
+            if sim > best_score:
+                best_score = sim
+                best_match = user
+
+        if best_score > 0.50:
+            return {
+                "status": "success", "match": True, "mode": mode,
+                "data": {
+                    **base_data,
+                    "liveness_score": float(real_score),
+                    "is_real": bool(is_real),
+                    "id": best_match['id'], 
+                    "name": best_match['name'], 
+                    "similarity": float(best_score)
+                }
+            }
+        else:
+            return {
+                "status": "success", "match": False, "mode": mode,
+                "data": {
+                    **base_data,
+                    "liveness_score": float(real_score),
+                    "is_real": bool(is_real),
+                    "id": None, 
+                    "name": "Unknown", 
+                    "similarity": float(best_score)
+                }
+            }
+
         
     if mode == "emotion":
         emotion_result = "Unknown"
