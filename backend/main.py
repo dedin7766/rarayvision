@@ -1,5 +1,6 @@
 import os
 import json
+from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -106,154 +107,18 @@ _FAVICON = "/api/v1/uploads/favicon.png"
 # Custom Swagger UI — branded header with Raray Vision logo
 @fastapi_app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui():
-    html = """<!DOCTYPE html>
-<html>
-<head>
-  <title>Raray Vision API — Swagger UI</title>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/png" href="/api/v1/uploads/favicon.png">
-  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css">
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-
-    /* ── Branded header ── */
-    .rv-header {
-      background: #0f172a;
-      padding: 10px 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      position: sticky;
-      top: 0;
-      z-index: 9999;
-      border-bottom: 2px solid #6366f1;
-    }
-    .rv-header img  { height: 36px; width: auto; border-radius: 6px; }
-    .rv-header span { color: #fff; font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; }
-    .rv-header small{ color: #94a3b8; font-size: 0.75rem; margin-left: 6px; }
-
-    /* Hide default Swagger topbar */
-    .swagger-ui .topbar { display: none !important; }
-    .swagger-ui .info   { margin-top: 24px; }
-  </style>
-</head>
-<body>
-  <div class="rv-header">
-    <img src="/api/v1/uploads/favicon.png" alt="Raray Vision Logo">
-    <span>Raray Vision API <small>v1.0.0</small></span>
-  </div>
-
-  <div id="swagger-ui"></div>
-
-  <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
-  <script>
-    window.onload = function () {
-      SwaggerUIBundle({
-        url: "/openapi.json",
-        dom_id: "#swagger-ui",
-        presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
-        layout: "BaseLayout",
-        deepLinking: true,
-        showExtensions: true,
-        showCommonExtensions: true,
-        tryItOutEnabled: true
-      })
-    }
-  </script>
-</body>
-</html>"""
-    return HTMLResponse(html)
+    template_path = Path(__file__).parent / "templates" / "swagger.html"
+    return HTMLResponse(template_path.read_text())
 
 # Custom ReDoc — branded header with Raray Vision logo
 @fastapi_app.get("/redoc", include_in_schema=False)
 async def custom_redoc():
-    html = """<!DOCTYPE html>
-<html>
-<head>
-  <title>Raray Vision API — ReDoc</title>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/png" href="/api/v1/uploads/favicon.png">
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-
-    /* ── Branded header ── */
-    .rv-header {
-      background: #0f172a;
-      padding: 10px 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      height: 58px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 9999;
-      border-bottom: 2px solid #6366f1;
-    }
-    .rv-header img  { height: 36px; width: auto; border-radius: 6px; }
-    .rv-header span { color: #fff; font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; }
-    .rv-header small{ color: #94a3b8; font-size: 0.75rem; margin-left: 6px; }
-
-    /* ── Push ReDoc below our fixed header (58px) ── */
-    /* Sidebar panel */
-    .menu-content {
-      top: 58px !important;
-      height: calc(100vh - 58px) !important;
-    }
-    /* Right / main content panel */
-    .api-content {
-      margin-top: 58px !important;
-    }
-    /* Fallback: top-level redoc wrapper */
-    redoc > div > div:last-child {
-      margin-top: 58px;
-    }
-  </style>
-</head>
-<body>
-  <div class="rv-header">
-    <img src="/api/v1/uploads/favicon.png" alt="Raray Vision Logo">
-    <span>Raray Vision API <small>v1.0.0</small></span>
-  </div>
-
-  <redoc spec-url="/openapi.json" hide-loading></redoc>
-
-  <script src="https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js"></script>
-</body>
-</html>"""
-    return HTMLResponse(html)
+    template_path = Path(__file__).parent / "templates" / "redoc.html"
+    return HTMLResponse(template_path.read_text())
 
 def get_404_html():
-    return """<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Not Found | Raray Vision</title>
-    <style>
-        body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; }
-        .container { max-width: 500px; padding: 40px; background: #1e293b; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5); }
-        h1 { font-size: 80px; margin: 0; color: #6366f1; letter-spacing: -2px; }
-        h2 { font-size: 24px; margin: 10px 0 20px; font-weight: 600; color: #e2e8f0; }
-        p { color: #94a3b8; font-size: 15px; line-height: 1.6; margin-bottom: 30px; }
-        a { display: inline-block; padding: 10px 24px; background: #3b82f6; color: #fff; text-decoration: none; font-weight: 500; border-radius: 8px; transition: background 0.2s; }
-        a:hover { background: #2563eb; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>404</h1>
-        <h2>Endpoint Not Found</h2>
-        <p>The API endpoint or page you are looking for does not exist.<br>Please refer to the official API documentation.</p>
-        <a href="/docs">View API Documentation</a>
-    </div>
-</body>
-</html>"""
+    template_path = Path(__file__).parent / "templates" / "404.html"
+    return template_path.read_text()
 
 @fastapi_app.exception_handler(StarletteHTTPException)
 async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):

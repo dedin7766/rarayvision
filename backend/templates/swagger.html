@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Raray Vision API — Swagger UI</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="/api/v1/uploads/favicon.png">
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+    /* ── Branded header ── */
+    .rv-header {
+      background: #0f172a;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 9999;
+      border-bottom: 2px solid #6366f1;
+    }
+    .rv-header img  { height: 36px; width: auto; border-radius: 6px; }
+    .rv-header span { color: #fff; font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; }
+    .rv-header small{ color: #94a3b8; font-size: 0.75rem; margin-left: 6px; }
+
+    /* Hide default Swagger topbar */
+    .swagger-ui .topbar { display: none !important; }
+    .swagger-ui .info   { margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="rv-header">
+    <img src="/api/v1/uploads/favicon.png" alt="Raray Vision Logo">
+    <span>Raray Vision API <small>v1.0.0</small></span>
+  </div>
+
+  <div id="swagger-ui"></div>
+
+  <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+  <script>
+    window.onload = function () {
+      SwaggerUIBundle({
+        url: "/openapi.json",
+        dom_id: "#swagger-ui",
+        presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
+        layout: "BaseLayout",
+        deepLinking: true,
+        showExtensions: true,
+        showCommonExtensions: true,
+        tryItOutEnabled: true
+      })
+    }
+  </script>
+</body>
+</html>
