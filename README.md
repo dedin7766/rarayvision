@@ -517,7 +517,15 @@ curl -X POST https://yourdomain.com/api/v1/auth/login-face \
 
 ## License
 
-This project is released under the MIT License. See [LICENSE](LICENSE) for details.
+Raray Vision is licensed under the GNU Affero General Public License v3.0 (AGPLv3).
+
+Any modifications, including software offered as a network service (SaaS), must also be released under the same license. See [LICENSE](LICENSE) for details.
+
+## Trademark
+
+"Raray Vision" and its logos are trademarks of Dedin Toyibah.
+
+Forks, derivative works, or modified versions may not use the Raray Vision name, logo, or branding without explicit permission. See [TRADEMARK.md](TRADEMARK.md) for details.
 
 ---
 

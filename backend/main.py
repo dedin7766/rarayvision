@@ -16,6 +16,31 @@ from backend.app.database.database import Base, engine
 # Create DB Tables
 Base.metadata.create_all(bind=engine)
 
+def create_default_admin():
+    from backend.app.database.database import SessionLocal
+    from backend.app.database.models import User
+    from backend.app.core.security import get_password_hash
+    
+    db = SessionLocal()
+    try:
+        admin_email = "admin@rarayvision.dfs.co.id"
+        admin = db.query(User).filter(User.email == admin_email).first()
+        if not admin:
+            print(f"Creating default admin user: {admin_email}")
+            admin = User(
+                email=admin_email,
+                password_hash=get_password_hash("askingme"),
+                name="System Admin"
+            )
+            db.add(admin)
+            db.commit()
+    except Exception as e:
+        print(f"Failed to create default admin: {e}")
+    finally:
+        db.close()
+
+create_default_admin()
+
 fastapi_app = FastAPI(
     title="Raray Vision API",
     description="""
@@ -146,7 +171,7 @@ from backend.app.core.deps import get_current_user
 from sqlalchemy.sql import func
 
 @fastapi_app.get("/health", tags=["System"])
-def health_check(current_user: User = Depends(get_current_user)):
+def health_check():
     return {"status": "ok", "message": "Raray Vision API is online"}
 
 @fastapi_app.get("/version", tags=["System"])
@@ -171,30 +196,4 @@ def get_stats(db: Session = Depends(get_db), current_user: User = Depends(get_cu
 # Setup Socket.IO App
 app = socketio.ASGIApp(sio, fastapi_app)
 
-# On Startup hook if needed
-@fastapi_app.on_event("startup")
-async def startup_event():
-    print("🚀 FastAPI MVC Server Starting...")
-    from backend.app.database.database import SessionLocal
-    from backend.app.database.models import User
-    from backend.app.core.security import get_password_hash
-    
-    db = SessionLocal()
-    try:
-        admin_email = "admin@rarayvision.dfs.co.id"
-        admin = db.query(User).filter(User.email == admin_email).first()
-        if not admin:
-            print(f"Creating default admin user: {admin_email}")
-            admin = User(
-                email=admin_email,
-                hashed_password=get_password_hash("askingme"),
-                name="System Admin",
-                role="admin",
-                is_active=True
-            )
-            db.add(admin)
-            db.commit()
-    except Exception as e:
-        print(f"Failed to create default admin: {e}")
-    finally:
-        db.close()
+
