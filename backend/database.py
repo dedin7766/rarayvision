@@ -71,3 +71,22 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def init_default_user():
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.email == "admin@rarayvision.dfs.co.id").first()
+        if not user:
+            default_user = User(
+                email="admin@rarayvision.dfs.co.id",
+                password_hash=get_password_hash("askingme")
+            )
+            db.add(default_user)
+            db.commit()
+    except Exception as e:
+        print(f"Error initializing default user: {e}")
+    finally:
+        db.close()
+
+# Initialize default user
+init_default_user()
