@@ -153,8 +153,8 @@ const savePassword = async () => {
 
 const checkRegistrationStatus = async () => {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/v1/list-faces`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('rarayvision-token')}` }
+    const res = await fetch(`${API_BASE_URL}/api/v1/faces?limit=100`, {
+      headers: authHeaders()
     })
     const data = await res.json()
     if (res.ok && data.status === 'success') {
@@ -318,7 +318,7 @@ const registerFace = async () => {
       const fd = new FormData()
       fd.append('file', blob, 'login_face.jpg')
       
-      const res = await fetch(`${API_BASE_URL}/api/v1/register-login-face`, { 
+      const res = await fetch(`${API_BASE_URL}/api/v1/faces/login`, { 
         method: 'POST', 
         headers: { 'Authorization': `Bearer ${localStorage.getItem('rarayvision-token')}` },
         body: fd 

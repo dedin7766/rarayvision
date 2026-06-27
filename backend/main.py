@@ -56,7 +56,7 @@ fastapi_app.add_middleware(
 )
 
 # Paths to hide from Swagger UI & ReDoc
-_HIDDEN_PATHS = {"/api/v1/register-login-face"}
+_HIDDEN_PATHS = {"/api/v1/faces/login"}
 
 # HTTP middleware: intercept /openapi.json and strip hidden paths from response
 @fastapi_app.middleware("http")

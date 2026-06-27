@@ -29,7 +29,7 @@ from backend.app.schemas.schemas import FeedbackRequest
 router = APIRouter(prefix="/api/v1")
 
 @router.post(
-    "/check-liveness",
+    "/faces/liveness",
     tags=["Liveness"],
     summary="Verify face liveness and detect spoof attacks",
     description="""
@@ -60,7 +60,7 @@ async def check_liveness_endpoint(file: UploadFile = File(...)):
 
 # --- 2. COMPARE FACE (Verification Step 2) ---
 @router.post(
-    "/compare-face",
+    "/faces/compare",
     tags=["Recognition"],
     summary="Perform 1:1 face verification",
     description="""
@@ -91,7 +91,7 @@ async def compare_face_endpoint(
 
 # --- 3. REGISTER (Extract Embedding) ---
 @router.post(
-    "/extract-face",
+    "/faces/extract",
     tags=["Analysis"],
     summary="Extract face embeddings and facial landmarks",
     description="""
@@ -120,7 +120,7 @@ async def extract_face_endpoint(file: UploadFile = File(...)):
 
 # --- 3. REGISTER FACE (Save to Local Face DB) ---
 @router.post(
-    "/register-face",
+    "/faces",
     tags=["Registration"],
     summary="Register a new face with liveness verification"
 )
@@ -186,12 +186,12 @@ async def register_face_endpoint(
 
 # --- 3.1. UPDATE FACE ---
 @router.put(
-    "/update-face",
+    "/faces/{user_id}",
     tags=["Registration"],
     summary="Update an existing registered face"
 )
 async def update_face_endpoint(
-    user_id: str = Form(...),
+    user_id: str,
     user_name: str = Form(None),
     file: UploadFile = File(...),
     current_user: db_models.User = Depends(get_current_user),
@@ -240,12 +240,12 @@ async def update_face_endpoint(
 
 # --- 3.2. DELETE FACE ---
 @router.delete(
-    "/delete-face",
+    "/faces/{user_id}",
     tags=["Registration"],
     summary="Delete a registered face"
 )
 async def delete_face_endpoint(
-    user_id: str = Form(...),
+    user_id: str,
     current_user: db_models.User = Depends(get_current_user),
     db_session: Session = Depends(db.get_db)
 ):
@@ -270,16 +270,27 @@ async def delete_face_endpoint(
 
 # --- 4. LIST FACES ---
 @router.get(
-    "/list-faces",
+    "/faces",
     tags=["Management"],
     summary="List all registered faces"
 )
 async def list_faces_endpoint(
+    page: int = 1,
+    limit: int = 50,
+    search: str = None,
     current_user: db_models.User = Depends(get_current_user),
     db_session: Session = Depends(db.get_db)
 ):
     try:
-        faces = db_session.query(db_models.Face).filter(db_models.Face.user_id == current_user.id).order_by(db_models.Face.created_at.desc()).all()
+        query = db_session.query(db_models.Face).filter(db_models.Face.user_id == current_user.id)
+        
+        if search:
+            search_term = f"%{search}%"
+            query = query.filter(db_models.Face.name.ilike(search_term) | db_models.Face.face_id.ilike(search_term))
+            
+        total_count = query.count()
+        faces = query.order_by(db_models.Face.created_at.desc()).offset((page - 1) * limit).limit(limit).all()
+        
         result = []
         for f in faces:
             result.append({
@@ -291,8 +302,42 @@ async def list_faces_endpoint(
             })
         return {
             "status": "success",
-            "total": len(result),
+            "total": total_count,
+            "page": page,
+            "limit": limit,
             "faces": result,
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@router.get(
+    "/faces/{user_id}",
+    tags=["Management"],
+    summary="Get a registered face by user_id"
+)
+async def get_face_by_id_endpoint(
+    user_id: str,
+    current_user: db_models.User = Depends(get_current_user),
+    db_session: Session = Depends(db.get_db)
+):
+    try:
+        face = db_session.query(db_models.Face).filter(
+            db_models.Face.user_id == current_user.id,
+            db_models.Face.face_id == user_id
+        ).first()
+        
+        if not face:
+            return {"status": "error", "message": f"Face with user_id {user_id} not found."}
+            
+        return {
+            "status": "success",
+            "face": {
+                "id": face.face_id,
+                "name": face.name,
+                "image_url": face.image_url,
+                "created_at": face.created_at.isoformat() if face.created_at else None,
+                "updated_at": face.created_at.isoformat() if face.created_at else None
+            }
         }
     except Exception as e:
         return {"status": "error", "message": str(e)}
@@ -300,7 +345,7 @@ async def list_faces_endpoint(
 
 # --- REGISTER FACE LIVE (skip liveness check, untuk live camera) ---
 @router.post(
-    "/register-face-noliveness",
+    "/faces/no-liveness",
     tags=["Registration"],
     summary="Register a face without liveness verification"
 )
@@ -364,7 +409,7 @@ async def register_face_noliveness_endpoint(
 
 # --- REGISTER FACE LIVE (skip liveness check, untuk live camera) ---
 @router.post(
-    "/register-face-live",
+    "/faces/live",
     tags=["Registration"],
     summary="Register a face from live camera input"
 )
@@ -427,7 +472,7 @@ async def register_face_live_endpoint(
 
 # --- RECOGNIZE LIVE (skip liveness check, untuk live camera stream) ---
 @router.post(
-    "/recognize-live",
+    "/faces/recognize/live",
     tags=["Recognition"],
     summary="Real-time face recognition and analysis",
     description="""
@@ -459,7 +504,7 @@ async def recognize_live_endpoint(file: UploadFile = File(...), mode: str = Form
     except Exception as e:
         return {"status": "error", "message": str(e)}
 @router.post(
-    "/recognize",
+    "/faces/recognize",
     tags=["Recognition"],
     summary="Recognize a face against registered identities",
     description="""
@@ -484,7 +529,7 @@ async def recognize_endpoint(file: UploadFile = File(...), current_user: db_mode
         return {"status": "error", "message": str(e)}
 
 @router.post(
-    "/recognize-multi",
+    "/faces/recognize/multi",
     tags=["Recognition"],
     summary="Identify multiple faces in a single uploaded image",
     description="""
@@ -509,7 +554,7 @@ async def recognize_multi_endpoint(file: UploadFile = File(...), current_user: d
         return {"status": "error", "message": str(e)}
 
 @router.post(
-    "/recognize-live-multi",
+    "/faces/recognize/live-multi",
     tags=["Recognition"],
     summary="Identify multiple faces in a real-time live stream frame",
     description="""
@@ -535,7 +580,7 @@ async def recognize_live_multi_endpoint(file: UploadFile = File(...), current_us
         return {"status": "error", "message": str(e)}
 
 # --- REGISTER LOGIN FACE (dedicated endpoint for face login registration) ---
-@router.post("/register-login-face", include_in_schema=False)
+@router.post("/faces/login", include_in_schema=False)
 async def register_login_face_endpoint(
     request: Request,
     file: UploadFile = File(...),

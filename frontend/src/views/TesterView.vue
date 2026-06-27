@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { store } from '../store'
 import { API_BASE_URL } from '../utils'
 
-const testEndpoint = ref('/api/v1/list-faces')
+const testEndpoint = ref('GET:/api/v1/faces')
 const testUserId = ref('')
 const testUserName = ref('')
 const testFile = ref(null)
@@ -11,27 +11,32 @@ const testResponse = ref('')
 const isSendingTest = ref(false)
 
 const endpointOptions = [
-  { value: '/api/v1/list-faces', label: 'GET /api/v1/list-faces' },
-  { value: '/api/v1/compare-face', label: 'POST /api/v1/compare-face' },
-  { value: '/api/v1/extract-face', label: 'POST /api/v1/extract-face' },
-  { value: '/api/v1/register-face-noliveness', label: 'POST /api/v1/register-face (No Liveness)' },
-  { value: '/api/v1/update-face', label: 'PUT /api/v1/update-face' },
-  { value: '/api/v1/delete-face', label: 'DELETE /api/v1/delete-face' },
-  { value: '/api/v1/recognize', label: 'POST /api/v1/recognize' },
-  { value: '/api/v1/recognize-multi', label: 'POST /api/v1/recognize-multi' }
+  { value: 'GET:/api/v1/faces', label: 'GET /api/v1/faces' },
+  { value: 'GET:/api/v1/faces/{user_id}', label: 'GET /api/v1/faces/{user_id}' },
+  { value: 'POST:/api/v1/faces', label: 'POST /api/v1/faces (Register)' },
+  { value: 'POST:/api/v1/faces/no-liveness', label: 'POST /api/v1/faces/no-liveness' },
+  { value: 'PUT:/api/v1/faces/{user_id}', label: 'PUT /api/v1/faces/{user_id}' },
+  { value: 'DELETE:/api/v1/faces/{user_id}', label: 'DELETE /api/v1/faces/{user_id}' },
+  { value: 'POST:/api/v1/faces/compare', label: 'POST /api/v1/faces/compare' },
+  { value: 'POST:/api/v1/faces/extract', label: 'POST /api/v1/faces/extract' },
+  { value: 'POST:/api/v1/faces/recognize', label: 'POST /api/v1/faces/recognize' },
+  { value: 'POST:/api/v1/faces/recognize/multi', label: 'POST /api/v1/faces/recognize/multi' }
 ]
 
+const currentMethod = computed(() => testEndpoint.value.split(':')[0])
+const currentPath = computed(() => testEndpoint.value.split(':')[1])
+
 const needsUserId = computed(() =>
-  ['/api/v1/compare-face','/api/v1/update-face','/api/v1/delete-face'].includes(testEndpoint.value)
+  ['GET:/api/v1/faces/{user_id}', 'POST:/api/v1/faces/compare', 'PUT:/api/v1/faces/{user_id}', 'DELETE:/api/v1/faces/{user_id}'].includes(testEndpoint.value)
 )
 const isUserIdRequired = computed(() =>
-  ['/api/v1/update-face','/api/v1/delete-face'].includes(testEndpoint.value)
+  ['GET:/api/v1/faces/{user_id}', 'PUT:/api/v1/faces/{user_id}', 'DELETE:/api/v1/faces/{user_id}'].includes(testEndpoint.value)
 )
 const needsUserName = computed(() =>
-  ['/api/v1/register-face','/api/v1/register-face-noliveness'].includes(testEndpoint.value)
+  ['POST:/api/v1/faces', 'POST:/api/v1/faces/no-liveness'].includes(testEndpoint.value)
 )
 const needsFile = computed(() =>
-  testEndpoint.value !== '/api/v1/delete-face' && testEndpoint.value !== '/api/v1/list-faces'
+  currentMethod.value !== 'GET' && currentMethod.value !== 'DELETE'
 )
 
 const testSelectedLabel = computed(() =>
@@ -48,17 +53,28 @@ const runApiTest = async () => {
   testResponse.value = 'Sending request...'
   try {
     let options = {}
-    if (testEndpoint.value === '/api/v1/list-faces') {
+    let urlPath = currentPath.value
+
+    if (currentMethod.value === 'GET') {
+      urlPath = urlPath.replace('{user_id}', testUserId.value.trim())
       options = { method: 'GET', headers: { 'Authorization': `Bearer ${activeKey}` } }
+    } else if (currentMethod.value === 'DELETE') {
+      urlPath = urlPath.replace('{user_id}', testUserId.value.trim())
+      options = { method: 'DELETE', headers: { 'Authorization': `Bearer ${activeKey}` } }
+    } else if (currentMethod.value === 'PUT') {
+      urlPath = urlPath.replace('{user_id}', testUserId.value.trim())
+      const fd = new FormData()
+      if (testFile.value) fd.append('file', testFile.value)
+      if (needsUserName.value && testUserName.value.trim()) fd.append('user_name', testUserName.value.trim())
+      options = { method: 'PUT', body: fd, headers: { 'Authorization': `Bearer ${activeKey}` } }
     } else {
       const fd = new FormData()
       if (testFile.value) fd.append('file', testFile.value)
       if (needsUserId.value && testUserId.value.trim()) fd.append('user_id', testUserId.value.trim())
       if (needsUserName.value && testUserName.value.trim()) fd.append('user_name', testUserName.value.trim())
-      const method = testEndpoint.value === '/api/v1/delete-face' ? 'DELETE' : testEndpoint.value === '/api/v1/update-face' ? 'PUT' : 'POST'
-      options = { method, body: fd, headers: { 'Authorization': `Bearer ${activeKey}` } }
+      options = { method: 'POST', body: fd, headers: { 'Authorization': `Bearer ${activeKey}` } }
     }
-    const res = await fetch(`${API_BASE_URL}${testEndpoint.value}`, options)
+    const res = await fetch(`${API_BASE_URL}${urlPath}`, options)
     testResponse.value = JSON.stringify(await res.json(), null, 2)
   } catch (error) {
     testResponse.value = JSON.stringify({ error: error.message }, null, 2)

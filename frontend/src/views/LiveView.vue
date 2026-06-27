@@ -290,7 +290,7 @@ const captureAndRecognize = async () => {
       const token = localStorage.getItem('rarayvision-token')
       const headers = {}
       if (token) headers['Authorization'] = `Bearer ${token}`
-      const endpoint = liveMode.value === 'identify_multi' ? '/api/v1/recognize-live-multi' : '/api/v1/recognize-live'
+      const endpoint = liveMode.value === 'identify_multi' ? '/api/v1/faces/recognize/live-multi' : '/api/v1/faces/recognize/live'
       const res = await fetch(`${API_BASE_URL}${endpoint}`, { method: 'POST', body: fd, headers })
       const data = await res.json()
       liveResult.value = data
@@ -509,7 +509,7 @@ const registerFromCamera = async () => {
       const fd = new FormData()
       fd.append('file', blob, 'register.jpg')
       if (registerUserName.value.trim()) fd.append('user_name', registerUserName.value.trim())
-      const res = await fetch(`${API_BASE_URL}/api/v1/register-face-live`, { 
+      const res = await fetch(`${API_BASE_URL}/api/v1/faces/live`, { 
         method: 'POST', 
         headers: { 'Authorization': `Bearer ${localStorage.getItem('rarayvision-token')}` },
         body: fd 
