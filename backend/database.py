@@ -5,11 +5,9 @@ import datetime
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from passlib.context import CryptContext
-from backend.app.core.config import DB_USER, DB_PASS, DB_HOST, DB_NAME
+from backend.app.core.config import DATABASE_URL
 
-SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
