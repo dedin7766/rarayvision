@@ -21,7 +21,8 @@ def get_me(current_user: db_models.User = Depends(get_current_user)):
             "email": current_user.email,
             "name": current_user.name or "",
             "avatar_url": current_user.avatar_url,
-            "has_password": current_user.password_hash is not None
+            "has_password": current_user.password_hash is not None,
+            "store_images": current_user.store_images
         }
     }
 
@@ -34,6 +35,7 @@ def update_profile(req: UpdateProfileRequest, db_session: Session = Depends(db.g
         current_user.email = req.email.strip()
         
     current_user.name = req.name.strip()
+    current_user.store_images = req.store_images
     db_session.commit()
     db_session.refresh(current_user)
     return {
@@ -41,7 +43,8 @@ def update_profile(req: UpdateProfileRequest, db_session: Session = Depends(db.g
         "user": {
             "id": current_user.id,
             "email": current_user.email,
-            "name": current_user.name or ""
+            "name": current_user.name or "",
+            "store_images": current_user.store_images
         }
     }
 

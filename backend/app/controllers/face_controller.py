@@ -154,14 +154,16 @@ async def register_face_endpoint(
         embedding = np.array(result["embedding"], dtype=np.float32)
         final_name = user_name.strip() if user_name and user_name.strip() else user_id
         
-        # Save image to disk
-        filename = f"{current_user.id}_{user_id}.jpg"
-        uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "faces")
-        os.makedirs(uploads_dir, exist_ok=True)
-        file_path = os.path.join(uploads_dir, filename)
-        cv2.imwrite(file_path, img)
-        base_url = str(request.base_url).rstrip("/") if request else ""
-        image_url = f"{base_url}/api/v1/uploads/faces/{filename}"
+        image_url = None
+        if getattr(current_user, "store_images", False):
+            # Save image to disk
+            filename = f"{current_user.id}_{user_id}.jpg"
+            uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "faces")
+            os.makedirs(uploads_dir, exist_ok=True)
+            file_path = os.path.join(uploads_dir, filename)
+            cv2.imwrite(file_path, img)
+            base_url = str(request.base_url).rstrip("/") if request else ""
+            image_url = f"{base_url}/api/v1/uploads/faces/{filename}"
         
         # (ID uniqueness check already performed above)
         known_faces_db.append({
@@ -256,6 +258,15 @@ async def delete_face_endpoint(
         before_count = len(known_faces_db)
         known_faces_db = [item for item in known_faces_db if str(item.get("id")) != str(user_id)]
         delete_face_from_db(db_session, current_user.id, user_id)
+
+        # Delete physical image if exists
+        uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "faces")
+        file_path = os.path.join(uploads_dir, f"{current_user.id}_{user_id}.jpg")
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except Exception as ex:
+                print(f"Failed to delete physical image: {ex}")
 
         return {
             "status": "success",
@@ -379,14 +390,16 @@ async def register_face_noliveness_endpoint(
         embedding = np.array(result["embedding"], dtype=np.float32)
         final_name = user_name.strip() if user_name and user_name.strip() else user_id
         
-        # Save image to disk
-        filename = f"{current_user.id}_{user_id}.jpg"
-        uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "faces")
-        os.makedirs(uploads_dir, exist_ok=True)
-        file_path = os.path.join(uploads_dir, filename)
-        cv2.imwrite(file_path, img)
-        base_url = str(request.base_url).rstrip("/") if request else ""
-        image_url = f"{base_url}/api/v1/uploads/faces/{filename}"
+        image_url = None
+        if getattr(current_user, "store_images", False):
+            # Save image to disk
+            filename = f"{current_user.id}_{user_id}.jpg"
+            uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "faces")
+            os.makedirs(uploads_dir, exist_ok=True)
+            file_path = os.path.join(uploads_dir, filename)
+            cv2.imwrite(file_path, img)
+            base_url = str(request.base_url).rstrip("/") if request else ""
+            image_url = f"{base_url}/api/v1/uploads/faces/{filename}"
         
         # (ID uniqueness check already performed above)
         known_faces_db.append({
@@ -444,14 +457,16 @@ async def register_face_live_endpoint(
         embedding = np.array(result["embedding"], dtype=np.float32)
         final_name = user_name.strip() if user_name and user_name.strip() else user_id
         
-        # Save image to disk
-        filename = f"{current_user.id}_{user_id}.jpg"
-        uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "faces")
-        os.makedirs(uploads_dir, exist_ok=True)
-        file_path = os.path.join(uploads_dir, filename)
-        cv2.imwrite(file_path, img)
-        base_url = str(request.base_url).rstrip("/") if request else ""
-        image_url = f"{base_url}/api/v1/uploads/faces/{filename}"
+        image_url = None
+        if getattr(current_user, "store_images", False):
+            # Save image to disk
+            filename = f"{current_user.id}_{user_id}.jpg"
+            uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "faces")
+            os.makedirs(uploads_dir, exist_ok=True)
+            file_path = os.path.join(uploads_dir, filename)
+            cv2.imwrite(file_path, img)
+            base_url = str(request.base_url).rstrip("/") if request else ""
+            image_url = f"{base_url}/api/v1/uploads/faces/{filename}"
         
         # (ID uniqueness check already performed above)
         known_faces_db.append({"id": user_id, "name": final_name, "embedding": embedding})
@@ -606,14 +621,16 @@ async def register_login_face_endpoint(
         face_id = str(current_user.id)
         face_name = "Face Login Profile"
         
-        # Save image to the correct uploads directory
-        uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "faces")
-        os.makedirs(uploads_dir, exist_ok=True)
-        filename = f"{current_user.id}_login_face.jpg"
-        file_path = os.path.join(uploads_dir, filename)
-        cv2.imwrite(file_path, img)
-        base_url = str(request.base_url).rstrip("/") if request else ""
-        image_url = f"{base_url}/api/v1/uploads/faces/{filename}"
+        image_url = None
+        if getattr(current_user, "store_images", False):
+            # Save image to the correct uploads directory
+            uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "faces")
+            os.makedirs(uploads_dir, exist_ok=True)
+            filename = f"{current_user.id}_login_face.jpg"
+            file_path = os.path.join(uploads_dir, filename)
+            cv2.imwrite(file_path, img)
+            base_url = str(request.base_url).rstrip("/") if request else ""
+            image_url = f"{base_url}/api/v1/uploads/faces/{filename}"
         
         # Upsert: save_face_to_db already handles update if face_id exists
         save_face_to_db(db_session, current_user.id, face_id, face_name, embedding, image_url if getattr(current_user, "store_images", False) else None)

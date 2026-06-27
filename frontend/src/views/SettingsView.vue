@@ -21,6 +21,8 @@ const editEmailValue = ref('')
 const isSavingProfile = ref(false)
 const profileSuccess = ref('')
 const profileError = ref('')
+const storeImagesValue = ref(false)
+const editStoreImagesValue = ref(false)
 
 // Password
 const isEditingPassword = ref(false)
@@ -49,6 +51,7 @@ const fetchProfile = async () => {
       userName.value = data.user.name || ''
       userEmail.value = data.user.email || ''
       hasPassword.value = data.user.has_password
+      storeImagesValue.value = data.user.store_images || false
     }
   } catch (e) {
     console.error('Failed to fetch profile', e)
@@ -58,6 +61,7 @@ const fetchProfile = async () => {
 const startEditProfile = () => {
   editNameValue.value = userName.value
   editEmailValue.value = userEmail.value
+  editStoreImagesValue.value = storeImagesValue.value
   isEditingProfile.value = true
   profileSuccess.value = ''
   profileError.value = ''
@@ -80,12 +84,17 @@ const saveProfile = async () => {
     const res = await fetch(`${API_BASE_URL}/api/v1/auth/update-profile`, {
       method: 'PUT',
       headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: editNameValue.value.trim(), email: editEmailValue.value.trim() })
+      body: JSON.stringify({ 
+        name: editNameValue.value.trim(), 
+        email: editEmailValue.value.trim(),
+        store_images: editStoreImagesValue.value
+      })
     })
     const data = await res.json()
     if (res.ok && data.status === 'success') {
       userName.value = data.user.name
       userEmail.value = data.user.email
+      storeImagesValue.value = data.user.store_images
       isEditingProfile.value = false
       profileSuccess.value = 'Profile updated successfully!'
       setTimeout(() => { profileSuccess.value = '' }, 3000)
@@ -374,6 +383,14 @@ onUnmounted(() => {
           <label class="field-label">Name</label>
           <p class="field-value">{{ userName || '—' }}</p>
         </div>
+
+        <div class="profile-field" style="margin-top: 16px;">
+          <label class="field-label">Save Physical Photos</label>
+          <p class="field-value">
+            <span v-if="storeImagesValue" style="color: var(--success); font-weight: 500;">Enabled</span>
+            <span v-else style="color: var(--text-secondary);">Disabled</span>
+          </p>
+        </div>
       </div>
       
       <div v-else class="profile-field">
@@ -397,6 +414,28 @@ onUnmounted(() => {
               class="name-input"
               @keyup.enter="saveProfile"
             />
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px; padding: 12px; background: rgba(0,0,0,0.02); border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);">
+            <div>
+              <label class="field-label" style="margin-bottom: 2px;">Save Physical Photos</label>
+              <p style="font-size: 12px; color: var(--text-secondary, #666); margin: 0;">Store physical face images in the uploads folder</p>
+            </div>
+            <label style="position: relative; display: inline-block; width: 44px; height: 24px;">
+              <input type="checkbox" v-model="editStoreImagesValue" style="opacity: 0; width: 0; height: 0;">
+              <span :style="{
+                position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0,
+                backgroundColor: editStoreImagesValue ? 'var(--primary, #0066ff)' : '#ccc',
+                transition: '.4s', borderRadius: '34px'
+              }">
+                <span :style="{
+                  position: 'absolute', height: '18px', width: '18px', left: '3px', bottom: '3px',
+                  backgroundColor: 'white', transition: '.4s', borderRadius: '50%',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                  transform: editStoreImagesValue ? 'translateX(20px)' : 'translateX(0)'
+                }"></span>
+              </span>
+            </label>
           </div>
         </div>
         <div class="edit-name-actions">

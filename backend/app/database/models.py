@@ -1,6 +1,6 @@
 import uuid
 import datetime
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from backend.app.database.database import Base
 
@@ -12,6 +12,7 @@ class User(Base):
     name = Column(String(255), nullable=True)
     avatar_url = Column(String(500), nullable=True)
     password_hash = Column(String(255), nullable=True)
+    store_images = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     api_keys = relationship("ApiKey", back_populates="user", cascade="all, delete-orphan")
