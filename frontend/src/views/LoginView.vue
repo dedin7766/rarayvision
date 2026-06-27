@@ -240,16 +240,16 @@ onUnmounted(() => {
       </div>
 
       <div v-if="showFaceLogin" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-        <div v-if="isFaceLoginSuccess" style="width: 100%; max-width: 400px; aspect-ratio: 4/3; background: #0f172a; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 16px; color: white;">
+        <div v-if="isFaceLoginSuccess" class="success-container">
           <div class="dot-typing" style="margin-bottom: 24px;"></div>
           <p style="font-size: 16px; font-weight: 500; color: #22c55e; margin-bottom: 8px;">Login Successful!</p>
           <p style="font-size: 14px; color: #94a3b8;">Entering workspace...</p>
         </div>
-        <div v-else style="position: relative; width: 100%; max-width: 400px; aspect-ratio: 4/3; background: #0f172a; border-radius: 8px; overflow: hidden; margin-bottom: 16px;">
-          <video ref="faceVideoEl" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);" autoplay playsinline muted></video>
-          <canvas ref="faceCanvasEl" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
-          <div v-if="mediaPipeLoading" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; font-size: 14px;">Loading MediaPipe...</div>
-          <div v-else-if="!hasMediaPipeFace" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); color: white; font-size: 14px;">
+        <div v-else class="camera-container">
+          <video ref="faceVideoEl" class="camera-video" autoplay playsinline muted></video>
+          <canvas ref="faceCanvasEl" class="camera-canvas"></canvas>
+          <div v-if="mediaPipeLoading" class="camera-overlay">Loading MediaPipe...</div>
+          <div v-else-if="!hasMediaPipeFace" class="camera-overlay">
             <svg class="spinner-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 8px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
             Detecting Face...
           </div>
@@ -297,6 +297,65 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.camera-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 4/3;
+  background: #0f172a;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.success-container {
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 4/3;
+  background: #0f172a;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: white;
+}
+.camera-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+.camera-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.camera-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.4);
+  color: white;
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .camera-container, .success-container {
+    max-width: 100%;
+    aspect-ratio: 3/4;
+  }
+}
+
 .dot-typing {
   position: relative;
   left: -9999px;
