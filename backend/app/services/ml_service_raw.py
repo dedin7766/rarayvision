@@ -21,13 +21,14 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
-import backend.database as db
+from backend.app.database import database as db
+from backend.app.database import models as db_models
 from backend.app.core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 # ================= KONFIGURASI =================
-# Path model anti-spoofing di folder models/ (satu level di atas backend)
+# Path model anti-spoofing di folder ml_models/ (satu level di atas backend)
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-ANTI_SPOOF_MODEL_PATH = os.path.join(BASE_DIR, "models", "best_model_quantized.onnx")
-EMOTION_MODEL_PATH = os.path.join(BASE_DIR, "models", "emotion-ferplus-8.onnx")
+ANTI_SPOOF_MODEL_PATH = os.path.join(BASE_DIR, "ml_models", "best_model_quantized.onnx")
+EMOTION_MODEL_PATH = os.path.join(BASE_DIR, "ml_models", "emotion-ferplus-8.onnx")
 # ===============================================
 
 from fastapi.staticfiles import StaticFiles

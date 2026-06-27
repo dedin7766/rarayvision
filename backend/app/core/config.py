@@ -22,6 +22,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1008
 # Base paths
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-# Model paths (inside backend/models/)
-ANTI_SPOOF_MODEL_PATH = os.path.join(BASE_DIR, "models", "MiniFASNetV2.onnx")
-EMOTION_MODEL_PATH = os.path.join(BASE_DIR, "models", "emotion-ferplus-8.onnx")
+# Model paths (inside backend/ml_models/)
+ANTI_SPOOF_MODEL_PATH = os.path.join(BASE_DIR, "ml_models", "MiniFASNetV2.onnx")
+EMOTION_MODEL_PATH = os.path.join(BASE_DIR, "ml_models", "emotion-ferplus-8.onnx")

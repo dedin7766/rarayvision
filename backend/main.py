@@ -275,7 +275,8 @@ def submit_feedback(feedback: FeedbackRequest):
 
 from sqlalchemy.orm import Session
 from fastapi import Depends
-from backend.database import get_db, Face, ApiKey, User
+from backend.app.database.database import get_db
+from backend.app.database.models import Face, ApiKey, User
 from backend.app.core.deps import get_current_user
 from sqlalchemy.sql import func
 

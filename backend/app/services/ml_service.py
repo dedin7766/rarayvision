@@ -16,7 +16,7 @@ import requests
 
 # JWT Secret Key
 # ================= KONFIGURASI =================
-# Path model anti-spoofing di folder models/ (satu level di atas backend)
+# Path model anti-spoofing di folder ml_models/ (satu level di atas backend)
 # URL CodeIgniter API (Main Server)
 # ===============================================
 
