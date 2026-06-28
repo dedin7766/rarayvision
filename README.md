@@ -292,19 +292,9 @@ ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=10080
 ```
 
-### 5. Place ONNX model files
-
-Copy your ONNX model files into `backend/models/`:
-
-```
-backend/models/
-  best_model_quantized.onnx   — Anti-spoofing model
-  emotion-ferplus-8.onnx      — Emotion detection model
-```
-
 InsightFace models (buffalo_l) are downloaded automatically on first run into `~/.insightface/models/`.
 
-### 6. Start the backend with PM2
+### 5. Start the backend with PM2
 
 ```bash
 pm2 start ecosystem.config.js
@@ -318,7 +308,7 @@ Or manually:
 uvicorn backend.main:app --host 0.0.0.0 --port 5000
 ```
 
-### 7. Build the frontend
+### 6. Build the frontend
 
 ```bash
 cd frontend
@@ -328,7 +318,7 @@ npm run build
 
 The output is in `frontend/dist/`. Serve it via Nginx.
 
-### 8. Configure Nginx
+### 7. Configure Nginx
 
 Create `/etc/nginx/sites-available/rarayvision`:
 
@@ -381,7 +371,7 @@ nginx -t
 systemctl reload nginx
 ```
 
-### 9. Enable HTTPS with Certbot (optional but recommended)
+### 8. Enable HTTPS with Certbot (optional but recommended)
 
 ```bash
 apt install certbot python3-certbot-nginx
@@ -510,7 +500,6 @@ curl -X POST https://yourdomain.com/api/v1/auth/login-face \
 ## Face Model Notes
 
 - InsightFace downloads the `buffalo_l` model pack automatically on first run. This requires an internet connection during initial startup.
-- The anti-spoofing model (`best_model_quantized.onnx`) must be placed manually in `backend/models/`.
 - CPU inference is fully supported. GPU (CUDA) is supported if `onnxruntime-gpu` is installed instead of `onnxruntime`.
 
 ---
