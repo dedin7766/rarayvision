@@ -60,7 +60,6 @@ Powered by:
     version="1.0.0",
     openapi_version="3.0.2",
     contact={"name": "Raray Vision Team", "url": "https://rarayvision.dfs.co.id"},
-    servers=[{"url": "https://apirv.dfs.co.id", "description": "Production Server"}],
     docs_url=None,
     redoc_url=None,
 )
