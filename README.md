@@ -89,17 +89,20 @@ rarayvision/
 
 | Method | Path | Description |
 |---|---|---|
-| POST | /api/v1/check-liveness | Verify face liveness / anti-spoofing |
-| POST | /api/v1/recognize | 1:N face identification |
-| POST | /api/v1/compare-face | 1:1 face verification |
-| POST | /api/v1/recognize-live | Real-time multi-mode recognition |
-| POST | /api/v1/register-face | Register face with liveness check |
-| POST | /api/v1/register-face-live | Register face from live camera |
-| POST | /api/v1/register-face-noliveness | Register face without liveness |
-| PUT | /api/v1/update-face | Update registered face |
-| DELETE | /api/v1/delete-face | Delete registered face |
-| GET | /api/v1/list-faces | List all registered faces |
-| POST | /api/v1/extract-face | Extract embeddings and landmarks |
+| POST | /api/v1/faces | Register a new face with liveness check |
+| GET | /api/v1/faces | List all registered faces |
+| GET | /api/v1/faces/{user_id} | Get a registered face by user_id |
+| PUT | /api/v1/faces/{user_id} | Update an existing registered face |
+| DELETE | /api/v1/faces/{user_id} | Delete a registered face |
+| POST | /api/v1/faces/liveness | Verify face liveness / anti-spoofing |
+| POST | /api/v1/faces/compare | 1:1 face verification |
+| POST | /api/v1/faces/extract | Extract embeddings and landmarks |
+| POST | /api/v1/faces/no-liveness | Register face without liveness check |
+| POST | /api/v1/faces/live | Register face from live camera |
+| POST | /api/v1/faces/recognize | 1:N face identification |
+| POST | /api/v1/faces/recognize/multi | 1:N face identification for multiple faces |
+| POST | /api/v1/faces/recognize/live | Real-time multi-mode recognition |
+| POST | /api/v1/faces/recognize/live-multi | Real-time multiple face recognition (live stream) |
 
 Full interactive documentation:
 - Swagger UI: `http://localhost:5000/docs`
