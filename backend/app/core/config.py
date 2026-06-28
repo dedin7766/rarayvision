@@ -13,8 +13,25 @@ if not DATABASE_URL:
     DB_NAME = os.getenv("DB_NAME", "rarayvision")
     DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
 
+# Environment mode: "development" (default) or "production"
+ENV = os.getenv("ENV", "development").lower()
+
 # JWT Configuration
-SECRET_KEY = os.getenv("SECRET_KEY", "change-me-to-a-random-secret-key")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    if ENV == "production":
+        raise RuntimeError(
+            "SECRET_KEY environment variable is not set. "
+            "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
+        )
+    else:
+        import warnings
+        SECRET_KEY = "dev-only-insecure-secret-key-do-not-use-in-production"
+        warnings.warn(
+            "WARNING: SECRET_KEY is not set. Using insecure default for development. "
+            "Set ENV=production to enforce this.",
+            stacklevel=2
+        )
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "10080"))  # 7 days
 

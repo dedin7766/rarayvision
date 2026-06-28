@@ -71,9 +71,21 @@ if not os.path.exists(uploads_dir):
 fastapi_app.mount("/api/v1/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
 # Setup CORS
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "")
+_allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
+# In development mode, allow all origins if ALLOWED_ORIGINS is not set
+_env_mode = os.getenv("ENV", "development").lower()
+if not _allowed_origins:
+    if _env_mode == "production":
+        import sys
+        print("WARNING: ALLOWED_ORIGINS is not set in production. CORS will block all origins.", file=sys.stderr)
+    else:
+        _allowed_origins = ["*"]
+
 fastapi_app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
